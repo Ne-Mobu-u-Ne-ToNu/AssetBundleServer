@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Загрузка файлов</title>
+    <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+    <header>
+        <h1>Загрузка файлов на сервер</h1>
+    </header>
+    <main>
+        <div id="drop-area">
+            <p>Перетащите файлы сюда или нажмите для выбора файлов</p>
+            <input type="file" id="fileElem" multiple>
+            <label for="fileElem" id="fileLabel">Выберите файлы</label>
+        </div>
+        <button id="uploadBtn">Загрузить</button>
+        <ul id="fileList"></ul>
+    </main>
+    <div id="footer-placeholder"></div>
+
+    <script src="/js/loadFooter.js"></script>
+    <script src="/js/uploadFiles.js"></script>
+</body>
+</html>

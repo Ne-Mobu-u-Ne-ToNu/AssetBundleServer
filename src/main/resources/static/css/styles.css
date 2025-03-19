@@ -1,0 +1,100 @@
+/* Общие стили для страницы */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f7fc;
+    color: #333;
+}
+
+header {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+}
+
+main {
+    padding: 20px;
+}
+
+footer {
+    background-color: #4CAF50;
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    position: fixed;
+    width: 100%;
+    bottom: 0;
+}
+
+/* Стили для области перетаскивания файлов */
+#drop-area {
+    border: 2px dashed #ccc;
+    padding: 20px;
+    text-align: center;
+    width: 400px;
+    margin: auto;
+}
+
+#drop-area.hover {
+    background-color: #f0f0f0;
+}
+
+#fileElem {
+    display: none;
+}
+
+#fileLabel {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+#fileLabel:hover {
+    background-color: #45a049;
+}
+
+#fileList {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+#fileList li {
+    background-color: #fff;
+    margin: 5px 0;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Стили для кнопки загрузки */
+#uploadBtn {
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+#uploadBtn:hover {
+    background-color: #45a049;
+}
+
+/* Для обработки перетаскивания файлов */
+#drop-area.dragover {
+    background-color: #e1f7e1;
+    border-color: #45a049;
+}
+
+#drop-area.dragover p {
+    color: #45a049;
+}
