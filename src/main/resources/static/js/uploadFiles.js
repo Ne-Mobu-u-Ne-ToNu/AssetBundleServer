@@ -38,34 +38,30 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // Функция загрузки нескольких файлов на сервер
-    function uploadFiles() {
-        const files = fileInput.files; // Получаем выбранные файлы из input
+    function uploadFile() {
+        const files = fileInput.files;
         if (files.length === 0) {
-            alert("Пожалуйста, выберите файлы для загрузки.");
+            alert("Пожалуйста, выберите файл для загрузки.");
             return;
         }
 
         const formData = new FormData();
-        // Добавляем файлы в FormData
-        for (let i = 0; i < files.length; i++) {
-            formData.append('files', files[i]);
-        }
+        formData.append('file', files[0]);
 
-        // Отправляем файлы на сервер с помощью fetch
-        fetch('/api/upload/multiple', {
+        // Отправляем файл на сервер с помощью fetch
+        fetch('/api/upload', {
             method: 'POST',
             body: formData,
         })
         .then(response => response.text())
         .then(data => {
-            alert('Файлы успешно загружены!');
+            alert('Файл успешно загружен!');
         })
         .catch(error => {
             console.error('Ошибка:', error);
-            alert('Произошла ошибка при загрузке файлов.');
+            alert('Произошла ошибка при загрузке файла.');
         });
     }
 
-    uploadButton.addEventListener('click', uploadFiles);
+    uploadButton.addEventListener('click', uploadFile);
 });

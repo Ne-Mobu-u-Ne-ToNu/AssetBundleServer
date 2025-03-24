@@ -32,30 +32,6 @@ public class FileController {
         return saveFile(file);
     }
 
-    @PostMapping("/api/upload/multiple")
-    @ResponseBody
-    public ResponseEntity<String> uploadFiles(@RequestParam("files") MultipartFile[] files) {
-        StringBuilder response = new StringBuilder();
-
-        for (MultipartFile file : files) {
-            ResponseEntity<String> result = saveFile(file);
-            response.append(result.getBody()).append("\n");
-        }
-
-        return ResponseEntity.ok(response.toString());
-    }
-
-    private ResponseEntity<String> saveFile(MultipartFile file) {
-        try {
-            String filename = StringUtils.cleanPath(file.getOriginalFilename());
-            Path targetPath = Path.of(uploadDir, filename).toAbsolutePath();
-            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
-            return ResponseEntity.ok("Файл загружен: " + filename);
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка загрузки файла: " + file.getOriginalFilename());
-        }
-    }
-
     @GetMapping("/api/download/{filename}")
     @ResponseBody
     public ResponseEntity<byte[]> downloadFile(@PathVariable String filename) {
@@ -67,6 +43,17 @@ public class FileController {
                     .body(fileBytes);
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    private ResponseEntity<String> saveFile(MultipartFile file) {
+        try {
+            String filename = StringUtils.cleanPath(file.getOriginalFilename());
+            Path targetPath = Path.of(uploadDir, filename).toAbsolutePath();
+            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+            return ResponseEntity.ok("Файл загружен: " + filename);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка загрузки файла: " + file.getOriginalFilename());
         }
     }
 }
