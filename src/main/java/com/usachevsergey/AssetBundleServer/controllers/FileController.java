@@ -15,25 +15,18 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
-@Controller
+@RestController
 public class FileController {
 
     @Value("${file.upload-dir}")
     private String uploadDir;
 
-    @GetMapping("/files")
-    public String index(Model model) {
-        return "files";
-    }
-
     @PostMapping("/api/upload")
-    @ResponseBody
     public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
         return saveFile(file);
     }
 
     @GetMapping("/api/download/{filename}")
-    @ResponseBody
     public ResponseEntity<byte[]> downloadFile(@PathVariable String filename) {
         try {
             Path filepath = Path.of(uploadDir, filename).toAbsolutePath();
