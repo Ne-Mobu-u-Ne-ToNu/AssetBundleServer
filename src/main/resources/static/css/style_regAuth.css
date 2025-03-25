@@ -1,0 +1,68 @@
+.regForm{
+    display:flex;
+    flex-direction: column;
+    width: 300px;
+    margin: auto;
+    margin-top: 100px;
+}
+
+.regForm input{
+    margin: 10px 0;
+    padding: 5px;
+
+    border: 1px solid #a0a0a0;
+    background-color: #f5f5f5;
+    font-weight: 100;
+}
+
+.regForm button{
+    float: left;
+    background-color: #8cbbd3;
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 300;
+    text-align: center;
+    text-decoration: none;
+    border: 0px;
+    border: 1px solid black;
+    margin-top: 15px;
+    padding:5px;
+}
+
+.regForm button:hover{
+    background-color: #5ba1d3;
+}
+
+.regForm p{
+    color: #242424;
+    font-size: 15px;
+    font-weight: 300;
+    text-align: left;
+    margin-top: 8px;
+}
+
+.regForm .msg {
+    padding: 8px;
+    border: 2px solid #5ba1d3;
+    border-radius: 10px;
+    font-size: 13px;
+    color: #ff4000;
+    text-align: center;
+    font-weight: 500;
+}
+
+.regForm a{
+    transition: 0.35s;
+}
+
+.regForm a:hover{
+    text-decoration: underline;
+    text-decoration-color: #242424;
+    text-decoration-style: dotted;
+}
+
+.regForm label:after{
+    color: red;
+    content: "*";
+    margin-left: 3px;
+}
