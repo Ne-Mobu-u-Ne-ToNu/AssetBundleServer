@@ -1,100 +1,109 @@
 /* Общие стили для страницы */
-body {
-    font-family: Arial, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: #f4f7fc;
-    color: #333;
+* {
+margin: 0;
+padding: 0;
+width: auto;
 }
 
-header {
-    background-color: #4CAF50;
-    color: white;
-    padding: 10px 0;
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f7f7f7;
+}
+
+header{
+    border-bottom: 1px solid #b5b7ba;
+    border-top: 1px solid #b5b7ba;
+    background-color: #dfdfdf;
+    margin: 0 auto;
+    height: 100px;
+    line-height: 100px;
     text-align: center;
+    min-width: 1300px;
+}
+
+header a{
+    color: #4d4d4d;
+    font-size: 20px;
+    text-align: left;
+    text-decoration: none;
+    line-height: 30px;
+    display: inline-block;
+    padding-right: 60px;
+    margin-top: 25px;
+    transition: 0.35s;
+}
+
+header a:hover{
+    color: #1997ad;
+}
+
+.auth-container {
+    position: absolute;
+    right: 50px;
+    top: 0;
+}
+
+.auth {
+    position: relative;
+    display: inline-block;
+}
+
+.auth a {
+    padding: 10px 15px;
+}
+
+.auth-menu {
+    display: block;
+    opacity: 0;
+    transform: translateY(-10px);
+    position: absolute;
+    right: 0;
+    top: 30px;
+    background-color: white;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 5px;
+    width: 200px;
+    text-align: left;
+    z-index: 10;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    visibility: hidden;
+}
+
+.auth-menu a {
+    display: block;
+    padding: 10px;
+    color: black;
+    text-decoration: none;
+}
+
+.auth-menu a:first-child {
+    margin-top: 0;
+}
+
+.auth-menu a:hover {
+    background-color: #ddd;
+}
+
+.auth:hover .auth-menu {
+    opacity: 1;
+    transform: translateY(0);
+    visibility: visible;
 }
 
 main {
-    padding: 20px;
+    padding: 50px;
 }
 
 footer {
-    background-color: #4CAF50;
-    color: white;
-    text-align: center;
-    padding: 10px 0;
+    background-color: #434445;
+    bottom: 0;
     position: fixed;
     width: 100%;
-    bottom: 0;
-}
-
-/* Стили для области перетаскивания файлов */
-#drop-area {
-    border: 2px dashed #ccc;
-    padding: 20px;
+    float: left;
+    height: 100px;
     text-align: center;
-    width: 400px;
-    margin: auto;
-}
-
-#drop-area.hover {
-    background-color: #f0f0f0;
-}
-
-#fileElem {
-    display: none;
-}
-
-#fileLabel {
-    display: inline-block;
-    padding: 10px 20px;
-    background-color: #4CAF50;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
-}
-
-#fileLabel:hover {
-    background-color: #45a049;
-}
-
-#fileList {
-    list-style-type: none;
-    padding-left: 0;
-}
-
-#fileList li {
-    background-color: #fff;
-    margin: 5px 0;
-    padding: 10px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-}
-
-/* Стили для кнопки загрузки */
-#uploadBtn {
-    background-color: #4CAF50;
-    color: white;
-    border: none;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: background-color 0.3s ease;
-}
-
-#uploadBtn:hover {
-    background-color: #45a049;
-}
-
-/* Для обработки перетаскивания файлов */
-#drop-area.dragover {
-    background-color: #e1f7e1;
-    border-color: #45a049;
-}
-
-#drop-area.dragover p {
-    color: #45a049;
+    color: #a4a4a4;
+    font-size: 20px;
+    font-weight: 100;
+    line-height: 100px;
 }

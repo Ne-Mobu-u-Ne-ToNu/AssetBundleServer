@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Регистрация</title>
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<div id="header-placeholder"></div>
+<main>
+  <form class = "regForm" action="../../classes/signUp.php" method="post" >
+    <label for="fullName">ФИО</label>
+    <input type="text" id="fullName" name="fullName" placeholder="Иванов Иван Иванович" required = "required">
+
+    <label for="login">Логин</label>
+    <input type="text" id="login" name="login" placeholder="Ваш логин" required = "required">
+
+    <label for="email">Электронная почта</label>
+    <input type="email" id="email" name="email" placeholder="example@mail.com" required = "required">
+
+    <label for="passw">Пароль</label>
+    <input type="password" id="passw" name="passw" placeholder="password***" required = "required">
+
+    <label for="passwConf">Подтверждение пароля</label>
+    <input type="password" id="passwConf" name="passwConf" placeholder="Confirm password***" required = "required">
+
+    <button type="submit">Зарегестрироваться</button>
+    <p>
+      Уже есть аккаунт? - <a href="/authorization">авторизируйтесь!</a>
+    </p>
+  </form>
+</main>
+<div id="footer-placeholder"></div>
+
+<script src="/js/loadHeader.js"></script>
+<script src="/js/loadFooter.js"></script>
+</body>
+</html>

@@ -5,10 +5,22 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class PageController {
-    @GetMapping("/files")
+    @GetMapping("/")
     public String index() {
-        return "files";
+        return "index";
+    }
+    @GetMapping("/uploadFile")
+    public String files() {
+        return "uploadFile";
     }
 
+    @GetMapping("/authorization")
+    public String authorization() {
+        return "authorization";
+    }
 
+    @GetMapping("/registration")
+    public String registration() {
+        return "registration";
+    }
 }
