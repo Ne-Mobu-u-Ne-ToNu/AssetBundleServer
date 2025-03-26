@@ -1,4 +1,5 @@
 document.getElementById('signInForm').addEventListener('submit', function(event) {
+  setMessageVisibility(false);
   event.preventDefault();
 
   const formData = {
@@ -22,16 +23,13 @@ document.getElementById('signInForm').addEventListener('submit', function(event)
             return response.text();
           })
           .then(message => {
-            if (message === "Не удалось авторизироваться. Неправильные имя пользователя или пароль") {
+            if (message === "Неверные имя пользователя или пароль") {
               throw new Error(message);
             } else {
-              alert(message);
-              //document.getElementById('message').textContent = message;
-              //window.location.href = "/#";
+              window.location.href = "/";
             }
           })
           .catch(error => {
-            alert(error.message);
-            //document.getElementById('message').textContent = error.message;
+            setMessageText(error.message);
           });
 });

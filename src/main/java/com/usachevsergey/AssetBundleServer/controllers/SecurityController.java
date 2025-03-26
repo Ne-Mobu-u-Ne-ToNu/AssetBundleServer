@@ -15,6 +15,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+
 @RestController
 @RequestMapping("/auth")
 public class SecurityController {
@@ -46,6 +50,22 @@ public class SecurityController {
 
     @PostMapping("/signup")
     ResponseEntity<?> signup(@RequestBody SignupRequest signupRequest) {
+        String validation = UserInputValidator.validateUser(signupRequest);
+        if (validation != null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validation);
+        }
+        validation = UserInputValidator.validateEmail(signupRequest.getEmail());
+        if (validation != null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validation);
+        }
+        validation = UserInputValidator.validatePasswordsMatch(signupRequest.getPassword(), signupRequest.getConfPassword());
+        if (validation != null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validation);
+        }
+        validation = UserInputValidator.validatePassword(signupRequest.getPassword());
+        if (validation != null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(validation);
+        }
         if (userRepository.existsUserByUsername(signupRequest.getUsername())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Выберите другое имя пользователя");
         }
@@ -67,8 +87,7 @@ public class SecurityController {
        try {
            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(signinRequest.getUsername(), signinRequest.getPassword()));
        } catch (BadCredentialsException e) {
-           return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Не удалось авторизироваться. " +
-                   "Неправильные имя пользователя или пароль");
+           return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Неверные имя пользователя или пароль");
        }
        SecurityContextHolder.getContext().setAuthentication(authentication);
        String jwt = jwtCore.generateToken(authentication);
