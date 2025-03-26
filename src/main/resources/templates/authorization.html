@@ -10,9 +10,9 @@
 <body>
 <div id="header-placeholder"></div>
 <main>
-  <form class = "regForm" action="../../classes/signIn.php" method="post">
-    <label for="login">Логин</label>
-    <input type="text" id="login" name="login" placeholder="Ваш логин" required = "required">
+  <form class="regForm" id=signInForm>
+    <label for="userName">Имя пользователя</label>
+    <input type="text" id="userName" name="userName" placeholder="Имя пользователя" required = "required">
     <label for="passw">Пароль</label>
     <input type="password" id="passw" name="password" placeholder="password***" required = "required">
     <button type="submit">Войти</button>
@@ -25,5 +25,6 @@
 
 <script src="/js/loadHeader.js"></script>
 <script src="/js/loadFooter.js"></script>
+<script src="/js/authorization.js"></script>
 </body>
 </html>
