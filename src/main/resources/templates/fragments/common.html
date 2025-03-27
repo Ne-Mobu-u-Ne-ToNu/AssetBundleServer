@@ -10,24 +10,26 @@
   <link rel="stylesheet" href="/css/style.css">
 
   <!-- Дополнительные стили от конкретной страницы -->
-  <div th:replace="~{${fragmentPage}::extraStyles}"></div>
+  <th:block th:replace="~{${fragmentPage}::extraStyles}"></th:block>
 </head>
 <body>
+    <!-- Общий header -->
+    <div th:replace="~{fragments/header::header}"></div>
 
-<!-- Общий header -->
-<div th:replace="~{fragments/header::header}"></div>
+    <!-- Контент страницы -->
+    <div th:replace="~{${fragmentPage} :: content}"></div>
 
-<!-- Контент страницы -->
-<div th:replace="~{${fragmentPage} :: content}"></div>
+    <!-- Общий footer -->
+    <div th:replace="~{fragments/footer::footer}"></div>
 
-<!-- Общий footer -->
-<div th:replace="~{fragments/footer::footer}"></div>
+    <!-- Кнопка "Наверх" -->
+    <button id="scrollToTop" class="scroll-to-top">&#8679;</button>
 
-<!-- Общие скрипты -->
-<script src="/js/loadFooter.js"></script>
+    <!-- Общие скрипты -->
+    <script src="/js/loadFooter.js"></script>
+    <script src="/js/scrollToTopBtn.js"></script>
 
-<!-- Скрипты страницы -->
-<div th:replace="~{${fragmentPage}::extraScripts}"></div>
-
+    <!-- Скрипты страницы -->
+    <th:block th:replace="~{${fragmentPage}::extraScripts}"></th:block>
 </body>
 </html>

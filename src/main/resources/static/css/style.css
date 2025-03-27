@@ -92,14 +92,36 @@ header a:hover{
 
 main {
     padding: 50px;
+    min-height: calc(100vh - 302px);
+}
+
+.scroll-to-top {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #8cbbd3;
+  color: #ffffff;
+  border: 1px solid black;
+  border-radius: 25%;
+  width: 60px;
+  height: 65px;
+  font-size: 30px;
+  display: none;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  transition: opacity 0.3s ease-in-out;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.scroll-to-top:hover {
+  background-color: #5ba1d3;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 footer {
     background-color: #434445;
-    bottom: 0;
-    position: fixed;
     width: 100%;
-    float: left;
     height: 100px;
     text-align: center;
     color: #a4a4a4;
