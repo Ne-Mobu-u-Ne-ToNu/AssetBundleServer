@@ -1,14 +1,5 @@
-<!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Загрузка файла</title>
-    <link rel="stylesheet" href="/css/style.css">
-    <link rel="stylesheet" href="/css/style_uploadFiles.css">
-</head>
-<body>
-    <div id="header-placeholder"></div>
+<!-- content -->
+<div th:fragment="content">
     <main>
         <div id="drop-area">
             <p>Перетащите файл сюда или нажмите для выбора файла</p>
@@ -18,10 +9,14 @@
         <button id="uploadBtn">Загрузить</button>
         <ul id="fileList"></ul>
     </main>
-    <div id="footer-placeholder"></div>
+</div>
 
-    <script src="/js/loadHeader.js"></script>
-    <script src="/js/loadFooter.js"></script>
+<!-- extraStyles -->
+<div th:fragment="extraStyles">
+    <link rel="stylesheet" href="/css/style_uploadFiles.css">
+</div>
+
+<!-- extraScripts -->
+<div th:fragment="extraScripts">
     <script src="/js/uploadFiles.js"></script>
-</body>
-</html>
+</div>

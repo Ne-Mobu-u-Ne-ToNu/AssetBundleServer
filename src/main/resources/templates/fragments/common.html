@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title th:text="${pageTitle}">Сайт</title>
+
+  <!-- Общие стили -->
+  <link rel="stylesheet" href="/css/style.css">
+
+  <!-- Дополнительные стили от конкретной страницы -->
+  <div th:replace="~{${fragmentPage}::extraStyles}"></div>
+</head>
+<body>
+
+<!-- Общий header -->
+<div th:replace="~{fragments/header::header}"></div>
+
+<!-- Контент страницы -->
+<div th:replace="~{${fragmentPage} :: content}"></div>
+
+<!-- Общий footer -->
+<div th:replace="~{fragments/footer::footer}"></div>
+
+<!-- Общие скрипты -->
+<script src="/js/loadFooter.js"></script>
+
+<!-- Скрипты страницы -->
+<div th:replace="~{${fragmentPage}::extraScripts}"></div>
+
+</body>
+</html>
