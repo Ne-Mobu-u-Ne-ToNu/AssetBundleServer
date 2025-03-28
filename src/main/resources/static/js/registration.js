@@ -39,12 +39,8 @@
           return response.text();
         })
         .then(message => {
-          if (message === "Регистрация прошла успешно!") {
             alert(message);
             window.location.href = "/authorization";
-          } else {
-            throw new Error(message);
-          }
         })
         .catch(error => {
           setMessageTextColor("red");

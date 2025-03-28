@@ -3,6 +3,7 @@ package com.usachevsergey.AssetBundleServer;
 import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,15 +33,34 @@ public class TokenFilter extends OncePerRequestFilter {
         UsernamePasswordAuthenticationToken auth;
 
         try {
-            String headerAuth = request.getHeader("Authorization");
-            if (headerAuth != null && headerAuth.startsWith("Bearer ")) {
-                jwt = headerAuth.substring(7);
+            // Получаем токен из кук
+            Cookie[] cookies = request.getCookies();
+            if (cookies != null) {
+                for (Cookie c : cookies) {
+                    if ("jwt".equals(c.getName())) {
+                        jwt = c.getValue();
+                    }
+                }
+            } else {
+                SecurityContextHolder.clearContext();
             }
             if (jwt != null) {
                 try {
+                    // Если токен валидный и скоро кончится генерируем и сохраняем новый
+                    if (jwtCore.isTokenExpiringSoon(jwt)) {
+                        jwt = jwtCore.generateTokenFromExisting(jwt);
+
+                        Cookie cookie = new Cookie("jwt", jwt);
+                        cookie.setHttpOnly(true);
+                        cookie.setPath("/");
+                        cookie.setMaxAge(jwtCore.getLifetime());
+                        response.addCookie(cookie);
+                    }
+                    // Если с токеном все ок, радуемся, если нет - выбрасывается исключение
                     username = jwtCore.getNameFromJwt(jwt);
                 } catch (Exception e) {
                     System.out.println(e.getMessage());
+                    SecurityContextHolder.clearContext();
                 }
                 if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                     userDetails = userDetailsService.loadUserByUsername(username);
@@ -53,6 +73,7 @@ public class TokenFilter extends OncePerRequestFilter {
             }
         } catch (Exception e) {
             System.out.println(e.getMessage());
+            SecurityContextHolder.clearContext();
         }
         filterChain.doFilter(request, response);
     }

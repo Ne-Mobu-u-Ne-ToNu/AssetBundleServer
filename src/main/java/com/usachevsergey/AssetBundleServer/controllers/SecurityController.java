@@ -1,7 +1,10 @@
 package com.usachevsergey.AssetBundleServer.controllers;
 
 import com.usachevsergey.AssetBundleServer.*;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,10 +17,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 @RestController
 @RequestMapping("/auth")
@@ -82,7 +81,7 @@ public class SecurityController {
     }
 
    @PostMapping("/signin")
-    ResponseEntity<?> signin(@RequestBody SigninRequest signinRequest) {
+    ResponseEntity<?> signin(@RequestBody SigninRequest signinRequest, HttpServletResponse response) {
        Authentication authentication;
        try {
            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(signinRequest.getUsername(), signinRequest.getPassword()));
@@ -91,6 +90,25 @@ public class SecurityController {
        }
        SecurityContextHolder.getContext().setAuthentication(authentication);
        String jwt = jwtCore.generateToken(authentication);
-       return ResponseEntity.ok(jwt);
+
+       Cookie cookie = new Cookie("jwt", jwt);
+       cookie.setHttpOnly(true);
+       cookie.setPath("/");
+       cookie.setMaxAge(jwtCore.getLifetime());
+       response.addCookie(cookie);
+       return ResponseEntity.ok("Авторизация прошла успешно!");
+   }
+
+   @PostMapping("/logout")
+    ResponseEntity<?> logout(HttpServletResponse response) {
+        Cookie cookie = new Cookie("jwt", null);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(0);
+        response.addCookie(cookie);
+
+        SecurityContextHolder.clearContext();
+
+        return ResponseEntity.ok("Выход выполнен успешно!");
    }
 }

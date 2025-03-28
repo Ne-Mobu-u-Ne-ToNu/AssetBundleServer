@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class PageController {
-    private String templateHtml = "fragments/common";
+    private final String templateHtml = "fragments/common";
 
     @GetMapping("/")
     public String index(Model model) {
