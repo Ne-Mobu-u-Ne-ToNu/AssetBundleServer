@@ -13,7 +13,7 @@ public class PageController {
         generatePage("Главная", "index", model);
         return templateHtml;
     }
-    @GetMapping("/uploadFile")
+    @GetMapping("/secured/uploadFile")
     public String files(Model model) {
         generatePage("Загрузка файла", "uploadFile", model);
         return templateHtml;
@@ -28,6 +28,12 @@ public class PageController {
     @GetMapping("/registration")
     public String registration(Model model) {
         generatePage("Регистрация", "registration", model);
+        return templateHtml;
+    }
+
+    @GetMapping("/secured/profile")
+    public String profile(Model model) {
+        generatePage("Профиль", "profile", model);
         return templateHtml;
     }
 
