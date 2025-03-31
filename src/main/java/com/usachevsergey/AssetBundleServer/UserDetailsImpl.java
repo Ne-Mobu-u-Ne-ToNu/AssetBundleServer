@@ -5,7 +5,9 @@ import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Date;
 
 @Data
 @AllArgsConstructor
@@ -15,13 +17,17 @@ public class UserDetailsImpl implements UserDetails {
     private String userName;
     private String email;
     private String password;
+    private String apiKey;
+    private Date createdAt;
 
     public static UserDetailsImpl build(User user) {
         return new UserDetailsImpl(
                 user.getId(),
                 user.getUsername(),
                 user.getEmail(),
-                user.getPassword());
+                user.getPassword(),
+                user.getApiKey(),
+                user.getCreatedAt());
     }
 
     @Override

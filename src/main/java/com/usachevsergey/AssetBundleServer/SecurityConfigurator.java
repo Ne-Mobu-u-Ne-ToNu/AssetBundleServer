@@ -22,6 +22,8 @@ import org.springframework.web.cors.CorsConfiguration;
 public class SecurityConfigurator {
 
     private TokenFilter tokenFilter;
+    @Autowired
+    private ApiKeyFilter apiKeyFilter;
 
     public SecurityConfigurator() {}
 
@@ -57,9 +59,11 @@ public class SecurityConfigurator {
                 )
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/api/**").permitAll()
                         .requestMatchers("/secured/**").fullyAuthenticated()
                         .anyRequest().permitAll()
                 )
+                .addFilterBefore(apiKeyFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(tokenFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }

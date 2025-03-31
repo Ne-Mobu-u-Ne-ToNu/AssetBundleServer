@@ -22,12 +22,12 @@ public class FileController {
     private String uploadDir;
 
     @PostMapping("/api/upload")
-    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) {
         return saveFile(file);
     }
 
     @GetMapping("/api/download/{filename}")
-    public ResponseEntity<byte[]> downloadFile(@PathVariable String filename) {
+    public ResponseEntity<?> downloadFile(@PathVariable String filename) {
         try {
             Path filepath = Path.of(uploadDir, filename).toAbsolutePath();
             byte[] fileBytes = Files.readAllBytes(filepath);
@@ -35,11 +35,11 @@ public class FileController {
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
                     .body(fileBytes);
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Не удалось загрузить файл!");
         }
     }
 
-    private ResponseEntity<String> saveFile(MultipartFile file) {
+    private ResponseEntity<?> saveFile(MultipartFile file) {
         try {
             String filename = StringUtils.cleanPath(file.getOriginalFilename());
             Path targetPath = Path.of(uploadDir, filename).toAbsolutePath();
