@@ -23,7 +23,7 @@
       password: password.value,
       confPassword: confirmPassword.value,
     };
-    fetch('/auth/signup', {
+    fetch('/api/public/auth/signup', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

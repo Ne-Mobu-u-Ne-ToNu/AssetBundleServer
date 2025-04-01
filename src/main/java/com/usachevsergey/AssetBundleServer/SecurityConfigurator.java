@@ -58,9 +58,10 @@ public class SecurityConfigurator {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/auth/**").permitAll()
-                        .requestMatchers("/api/**").permitAll()
-                        .requestMatchers("/secured/**").fullyAuthenticated()
+                        .requestMatchers("/api/public/**").permitAll()              // Публичные API-запросы
+                        .requestMatchers("/api/private/**").permitAll()             // Используются api ключи
+                        .requestMatchers("/api/secured/**").fullyAuthenticated()    // API-запросы с авторзацией через JWT
+                        .requestMatchers("/secured/**").fullyAuthenticated()        // Страницы с авторизацией через JWT
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(apiKeyFilter, UsernamePasswordAuthenticationFilter.class)

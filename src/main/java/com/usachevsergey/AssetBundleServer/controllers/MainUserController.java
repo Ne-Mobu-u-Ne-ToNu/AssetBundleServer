@@ -14,7 +14,7 @@ import java.security.Principal;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/secured")
+@RequestMapping("/api/secured")
 @RequiredArgsConstructor
 public class MainUserController {
     private final String unauthorizedMessage = "Пользователь не авторизован";
@@ -24,14 +24,14 @@ public class MainUserController {
     @GetMapping("/username")
     public ResponseEntity<?> userAccess(Principal principal) {
         if (principal == null)
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(unauthorizedMessage);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", unauthorizedMessage));
         return ResponseEntity.ok(Map.of("username", principal.getName()));
     }
 
     @GetMapping("/user")
     public ResponseEntity<?> userInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(unauthorizedMessage);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", unauthorizedMessage));
         }
         return ResponseEntity.ok(Map.of(
                 "username", userDetails.getUsername(),
@@ -41,11 +41,19 @@ public class MainUserController {
         ));
     }
 
+    @GetMapping("/apiKey")
+    public ResponseEntity<?> apiKey(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", unauthorizedMessage));
+        }
+        return ResponseEntity.ok(Map.of("api_key", userDetails.getApiKey()));
+    }
+
     @PutMapping("/updateUser")
     public ResponseEntity<?> updateUser(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                         @RequestBody UpdateUserRequest request) {
         if (userDetails == null) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(unauthorizedMessage);
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", unauthorizedMessage));
         }
 
         try {

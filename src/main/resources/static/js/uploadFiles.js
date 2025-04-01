@@ -38,10 +38,34 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    function uploadFile() {
+    async function getApiKey() {
+        try {
+            const response = await fetch('/api/secured/apiKey', {
+                method: 'GET',
+                credentials: 'include'
+            });
+
+            if (!response.ok) {
+                throw new Error("Не удалось получить API-ключ!");
+            }
+
+            const data = await response.json();
+            return data.api_key;
+        } catch (error) {
+            alert(error.message);
+            return null;
+        }
+    }
+
+    async function uploadFile() {
         const files = fileInput.files;
         if (files.length === 0) {
             alert("Пожалуйста, выберите файл для загрузки.");
+            return;
+        }
+
+        const apiKey = await getApiKey();
+        if (!apiKey) {
             return;
         }
 
@@ -49,17 +73,26 @@ document.addEventListener("DOMContentLoaded", function() {
         formData.append('file', files[0]);
 
         // Отправляем файл на сервер с помощью fetch
-        fetch('/api/upload', {
+        fetch('/api/private/upload', {
             method: 'POST',
             body: formData,
+            headers: {
+                'X-API-KEY': apiKey
+            }
         })
-        .then(response => response.text())
-        .then(data => {
-            alert('Файл успешно загружен!');
+        .then(response => {
+            if (!response.ok) {
+                return response.text().then(text => {
+                    throw new Error(text || 'Загрузка файла не удалась!');
+                });
+            }
+            return response.text();
+        })
+        .then(message => {
+            alert(message)
         })
         .catch(error => {
-            console.error('Ошибка:', error);
-            alert('Произошла ошибка при загрузке файла.');
+            alert(error.message);
         });
     }
 

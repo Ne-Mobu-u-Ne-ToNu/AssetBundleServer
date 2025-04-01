@@ -16,7 +16,7 @@ public class ApiKeyFilter extends OncePerRequestFilter {
     private UserService userService;
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        if (!request.getRequestURI().startsWith("/api")) {
+        if (!request.getRequestURI().startsWith("/api/private")) {
             filterChain.doFilter(request, response);
             return;
         }

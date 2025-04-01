@@ -1,6 +1,6 @@
 async function checkAuth() {
     try {
-        const response = await fetch('/secured/username', {
+        const response = await fetch('/api/secured/username', {
             method: 'GET',
             credentials: 'include'
         });

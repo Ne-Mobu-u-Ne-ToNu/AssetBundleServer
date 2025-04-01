@@ -4,8 +4,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -16,17 +14,18 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 
 @RestController
+@RequestMapping("/api/private")
 public class FileController {
 
     @Value("${file.upload-dir}")
     private String uploadDir;
 
-    @PostMapping("/api/upload")
+    @PostMapping("/upload")
     public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) {
         return saveFile(file);
     }
 
-    @GetMapping("/api/download/{filename}")
+    @GetMapping("/download/{filename}")
     public ResponseEntity<?> downloadFile(@PathVariable String filename) {
         try {
             Path filepath = Path.of(uploadDir, filename).toAbsolutePath();

@@ -1,7 +1,7 @@
 document.getElementById('logoutRef').addEventListener('click', function(event) {
     event.preventDefault();
 
-    fetch('/auth/logout', {
+    fetch('/api/public/auth/logout', {
         method: 'POST',
         credentials: 'include'
     }).then(() => {

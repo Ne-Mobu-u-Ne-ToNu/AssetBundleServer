@@ -7,7 +7,7 @@ document.getElementById('signInForm').addEventListener('submit', function(event)
     password: document.getElementById('passw').value
   };
 
-  fetch('/auth/signin', {
+  fetch('/api/public/auth/signin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
