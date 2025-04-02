@@ -58,11 +58,11 @@ public class MainUserController {
 
         try {
             userService.updateUser(userDetails.getUsername(), request, passwordEncoder);
-            return ResponseEntity.ok("Данные пользователя обновлены!");
+            return ResponseEntity.ok(Map.of("message", "Данные пользователя обновлены!"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Произошла ошибка на сервере");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Произошла ошибка на сервере"));
         }
     }
 }

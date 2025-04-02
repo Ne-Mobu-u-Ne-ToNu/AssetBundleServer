@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/public/auth")
 public class SecurityController {
@@ -46,11 +48,11 @@ public class SecurityController {
     ResponseEntity<?> signup(@RequestBody SignupRequest signupRequest) {
         try {
             userService.createUser(signupRequest, passwordEncoder);
-            return ResponseEntity.ok("Регистрация прошла успешно!");
+            return ResponseEntity.ok(Map.of("message", "Регистрация прошла успешно!"));
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Произошла ошибка на сервере");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error","Произошла ошибка на сервере"));
         }
     }
 
@@ -60,7 +62,7 @@ public class SecurityController {
        try {
            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(signinRequest.getUsername(), signinRequest.getPassword()));
        } catch (BadCredentialsException e) {
-           return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Неверные имя пользователя или пароль");
+           return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error","Неверные имя пользователя или пароль"));
        }
        SecurityContextHolder.getContext().setAuthentication(authentication);
        String jwt = jwtCore.generateToken(authentication);
@@ -70,7 +72,7 @@ public class SecurityController {
        cookie.setPath("/");
        cookie.setMaxAge(jwtCore.getLifetime());
        response.addCookie(cookie);
-       return ResponseEntity.ok("Авторизация прошла успешно!");
+       return ResponseEntity.ok(Map.of("message","Авторизация прошла успешно!"));
    }
 
    @PostMapping("/logout")
@@ -83,6 +85,6 @@ public class SecurityController {
 
         SecurityContextHolder.clearContext();
 
-        return ResponseEntity.ok("Выход выполнен успешно!");
+        return ResponseEntity.ok(Map.of("message","Выход выполнен успешно!"));
    }
 }

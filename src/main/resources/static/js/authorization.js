@@ -16,15 +16,15 @@ document.getElementById('signInForm').addEventListener('submit', function(event)
       })
       .then(response => {
             if (!response.ok) {
-              return response.text().then(text => {
-                throw new Error(text || 'Авторизация провалилась');
+              return response.json().then(data => {
+                throw new Error(data.error || 'Авторизация провалилась');
               });
             }
-            return response.text();
+            return response.json();
           })
-          .then(message => {
-            if (message === "Неверные имя пользователя или пароль") {
-              throw new Error(message);
+          .then(data => {
+            if (data.message === "Неверные имя пользователя или пароль") {
+              throw new Error(data.message);
             } else {
               window.location.href = "/";
             }

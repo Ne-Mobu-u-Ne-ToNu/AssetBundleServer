@@ -32,14 +32,14 @@
     })
     .then(response => {
           if (!response.ok) {
-            return response.text().then(text => {
-              throw new Error(text || 'Регистрация провалилась');
+            return response.json().then(data => {
+              throw new Error(data.error || 'Регистрация провалилась');
             });
           }
-          return response.text();
+          return response.json();
         })
-        .then(message => {
-            alert(message);
+        .then(data => {
+            alert(data.message);
             window.location.href = "/authorization";
         })
         .catch(error => {

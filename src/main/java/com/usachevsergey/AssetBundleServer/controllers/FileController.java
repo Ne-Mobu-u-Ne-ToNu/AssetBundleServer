@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/private")
@@ -32,9 +33,9 @@ public class FileController {
             byte[] fileBytes = Files.readAllBytes(filepath);
             return ResponseEntity.ok()
                     .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
-                    .body(fileBytes);
+                    .body(Map.of("file", fileBytes));
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Не удалось загрузить файл!");
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Не удалось загрузить файл!"));
         }
     }
 
@@ -43,9 +44,10 @@ public class FileController {
             String filename = StringUtils.cleanPath(file.getOriginalFilename());
             Path targetPath = Path.of(uploadDir, filename).toAbsolutePath();
             Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
-            return ResponseEntity.ok("Файл загружен: " + filename);
+            return ResponseEntity.ok(Map.of("message", "Файл загружен: " + filename));
         } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка загрузки файла: " + file.getOriginalFilename());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    Map.of("error", "Ошибка загрузки файла: " + file.getOriginalFilename()));
         }
     }
 }
