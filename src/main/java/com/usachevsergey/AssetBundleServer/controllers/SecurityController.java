@@ -12,10 +12,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Map;
 
@@ -28,6 +26,10 @@ public class SecurityController {
     private JwtCore jwtCore;
     @Autowired
     private UserService userService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private VerificationTokenRepository tokenRepository;
 
     @Autowired
     public void setPasswordEncoder(PasswordEncoder passwordEncoder) {
@@ -47,7 +49,8 @@ public class SecurityController {
     @PostMapping("/signup")
     ResponseEntity<?> signup(@RequestBody SignupRequest signupRequest) {
         try {
-            userService.createUser(signupRequest, passwordEncoder);
+            User user = userService.createUser(signupRequest, passwordEncoder);
+            userService.sendVerificationEmail(user);
             return ResponseEntity.ok(Map.of("message", "Регистрация прошла успешно!"));
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
@@ -86,5 +89,23 @@ public class SecurityController {
         SecurityContextHolder.clearContext();
 
         return ResponseEntity.ok(Map.of("message","Выход выполнен успешно!"));
+   }
+
+   @GetMapping("/verifyEmail")
+    ResponseEntity<?> verifyEmail(@RequestParam String token) {
+        VerificationToken verificationToken = tokenRepository.findByToken(token).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Токен не найден!"));
+
+        if (verificationToken.isExpired()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Токен истек, запросите новый"));
+        }
+
+        User user = verificationToken.getUser();
+        user.setEmailVerified(true);
+        userRepository.save(user);
+
+        tokenRepository.delete(verificationToken);
+
+        return ResponseEntity.ok(Map.of("message", "Email подтвержден!"));
    }
 }

@@ -18,6 +18,7 @@ public class UserDetailsImpl implements UserDetails {
     private String email;
     private String password;
     private String apiKey;
+    private boolean isEmailVerified;
     private Date createdAt;
 
     public static UserDetailsImpl build(User user) {
@@ -27,6 +28,7 @@ public class UserDetailsImpl implements UserDetails {
                 user.getEmail(),
                 user.getPassword(),
                 user.getApiKey(),
+                user.isEmailVerified(),
                 user.getCreatedAt());
     }
 

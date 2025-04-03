@@ -37,6 +37,7 @@ public class MainUserController {
                 "username", userDetails.getUsername(),
                 "email", userDetails.getEmail(),
                 "api_key", userDetails.getApiKey(),
+                "email_verified", userDetails.isEmailVerified(),
                 "created_at", userDetails.getCreatedAt()
         ));
     }

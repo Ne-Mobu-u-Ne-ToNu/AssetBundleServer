@@ -17,8 +17,10 @@ public class User {
     private String username;
     private String email;
     private String password;
-    @Column(name = "api_key", nullable = false)
+    @Column(name = "api_key", nullable = false, unique = true)
     private String apiKey;
+    @Column(name = "email_verified")
+    private boolean isEmailVerified;
     @Column(name = "created_at", updatable = false)
     private Date createdAt;
 
