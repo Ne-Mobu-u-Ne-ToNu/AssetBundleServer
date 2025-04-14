@@ -46,7 +46,9 @@ document.addEventListener("DOMContentLoaded", function() {
             });
 
             if (!response.ok) {
-                throw new Error("Не удалось получить API-ключ!");
+                return response.json().then(data => {
+                    throw new Error(data.error || "Не удалось получить API-ключ!");
+                })
             }
 
             const data = await response.json();
@@ -82,14 +84,14 @@ document.addEventListener("DOMContentLoaded", function() {
         })
         .then(response => {
             if (!response.ok) {
-                return response.text().then(text => {
-                    throw new Error(text || 'Загрузка файла не удалась!');
+                return response.json().then(data => {
+                    throw new Error(data.error || 'Загрузка файла не удалась!');
                 });
             }
-            return response.text();
+            return response.json();
         })
-        .then(message => {
-            alert(message)
+        .then(data => {
+            alert(data.message)
         })
         .catch(error => {
             alert(error.message);
