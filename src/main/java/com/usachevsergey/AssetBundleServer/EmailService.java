@@ -12,10 +12,10 @@ public class EmailService {
     private JavaMailSender javaMailSender;
 
     @Async
-    public void sendVerificationEmail(String emailAddress, String message) {
+    public void sendVerificationEmail(String emailAddress, String message, String subject) {
         SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
         simpleMailMessage.setTo(emailAddress);
-        simpleMailMessage.setSubject("Подтверждение email");
+        simpleMailMessage.setSubject(subject);
         simpleMailMessage.setText(message);
 
         javaMailSender.send(simpleMailMessage);

@@ -30,6 +30,7 @@ document.getElementById('signInForm').addEventListener('submit', function(event)
             }
           })
           .catch(error => {
+            setMessageVisibility(true);
             setMessageText(error.message);
           });
 });

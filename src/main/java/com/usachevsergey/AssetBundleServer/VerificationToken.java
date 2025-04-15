@@ -16,6 +16,9 @@ public class VerificationToken {
     @OneToOne
     @JoinColumn(name = "user_id")
     private User user;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "token_type", nullable = false)
+    private TokenType type;
     @Column(name = "expiry_date")
     private LocalDateTime expiryDate;
 

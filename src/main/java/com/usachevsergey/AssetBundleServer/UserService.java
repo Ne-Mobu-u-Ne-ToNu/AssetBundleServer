@@ -26,6 +26,8 @@ public class UserService implements UserDetailsService {
     private int verifyTokenLifetime;
     @Value("${server.app.verifyEmailLink}")
     private String verifyEmailLink;
+    @Value("${server.app.resetPasswordLink}")
+    private String resetPasswordLink;
 
     @Override
     public UserDetailsImpl loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -81,18 +83,51 @@ public class UserService implements UserDetailsService {
     }
 
     public void sendVerificationEmail(User user) {
+        String link = verifyEmailLink + saveToken(TokenType.EMAIL_VERIFICATION, user);
+        String message = "Для подтверждения email перейдите по ссылке " + link;
+
+        emailService.sendVerificationEmail(user.getEmail(), message, "Подтверждение email");
+    }
+
+    public void sendResetPasswordEmail(User user) {
+        String link = resetPasswordLink + saveToken(TokenType.PASSWORD_RESET, user);
+        String message = "Для сброса пароля перейдите по ссылке " + link;
+
+        emailService.sendVerificationEmail(user.getEmail(), message, "Сброс пароля");
+    }
+
+    public void resetUserPassword(User user, UpdateUserRequest request, PasswordEncoder passwordEncoder) {
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Пароль не должен быть прежним!");
+        }
+        String validation = UserInputValidator.validatePasswordsMatch(request.getNewPassword(), request.getConfPassword());
+        if (validation != null) {
+            throw new IllegalArgumentException(validation);
+        }
+        validation = UserInputValidator.validatePassword(request.getNewPassword());
+        if (validation != null) {
+            throw new IllegalArgumentException(validation);
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepository.save(user);
+    }
+
+    private String saveToken(TokenType type, User user) {
+        VerificationToken verificationToken = verificationTokenRepository.findByUser(user);
+        if (verificationTokenRepository.findByUser(user) == null) {
+            verificationToken = new VerificationToken();
+        }
+
         String token = generateApiKeyAndToken();
-        VerificationToken verificationToken = new VerificationToken();
         verificationToken.setToken(token);
         verificationToken.setUser(user);
+        verificationToken.setType(type);
         verificationToken.setExpiryDate(LocalDateTime.now().plusHours(verifyTokenLifetime));
 
         verificationTokenRepository.save(verificationToken);
 
-        String link = verifyEmailLink + token;
-        String message = "Для подтверждения email перейдите по ссылке " + link;
-
-        emailService.sendVerificationEmail(user.getEmail(), message);
+        return token;
     }
 
     private User getUser(String username) {

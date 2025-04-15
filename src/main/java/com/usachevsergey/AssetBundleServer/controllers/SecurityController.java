@@ -55,7 +55,7 @@ public class SecurityController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error","Произошла ошибка на сервере"));
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error","Произошла ошибка на сервере!"));
         }
     }
 
@@ -65,7 +65,7 @@ public class SecurityController {
        try {
            authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(signinRequest.getUsername(), signinRequest.getPassword()));
        } catch (BadCredentialsException e) {
-           return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error","Неверные имя пользователя или пароль"));
+           return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error","Неверные имя пользователя или пароль!"));
        }
        SecurityContextHolder.getContext().setAuthentication(authentication);
        String jwt = jwtCore.generateToken(authentication);
@@ -93,11 +93,11 @@ public class SecurityController {
 
    @GetMapping("/verifyEmail")
     ResponseEntity<?> verifyEmail(@RequestParam String token) {
-        VerificationToken verificationToken = tokenRepository.findByToken(token).orElseThrow(() ->
+        VerificationToken verificationToken = tokenRepository.findByTokenAndType(token, TokenType.EMAIL_VERIFICATION).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "Токен не найден!"));
 
         if (verificationToken.isExpired()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Токен истек, запросите новый"));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Токен истек, запросите новый!"));
         }
 
         User user = verificationToken.getUser();
@@ -108,4 +108,49 @@ public class SecurityController {
 
         return ResponseEntity.ok(Map.of("message", "Email подтвержден!"));
    }
+
+    @PostMapping("/resetPassword/request")
+    ResponseEntity<?> requestPasswordReset(@RequestParam String email) {
+        try {
+            User user = userRepository.findUserByEmail(email).orElseThrow(() ->
+                    new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь с таким email не найден!"));
+
+            String message = UserInputValidator.validateEmail(email);
+            if (message != null) {
+                throw new IllegalArgumentException(message);
+            }
+            userService.sendResetPasswordEmail(user);
+
+            return ResponseEntity.ok(Map.of("message", "Сообщение о сбросе пароля отправлено на почту!"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error","Произошла ошибка на сервере!"));
+        }
+    }
+
+    @PostMapping("/resetPassword/confirm")
+    ResponseEntity<?> confirmPasswordReset(@RequestBody UpdateUserRequest request) {
+        try {
+            VerificationToken verificationToken = tokenRepository.findByTokenAndType(request.getVerToken(), TokenType.PASSWORD_RESET).orElseThrow(() ->
+                    new ResponseStatusException(HttpStatus.NOT_FOUND, "Токен не найден!"));
+
+            if (verificationToken.isExpired()) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Токен истек, запросите новый!"));
+            }
+
+            userService.resetUserPassword(verificationToken.getUser(), request, passwordEncoder);
+            tokenRepository.delete(verificationToken);
+
+            return ResponseEntity.ok(Map.of("message", "Пароль обновлен!"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+        } catch (ResponseStatusException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error","Произошла ошибка на сервере!"));
+        }
+    }
 }

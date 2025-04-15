@@ -3,6 +3,7 @@ package com.usachevsergey.AssetBundleServer.controllers;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
 public class PageController {
@@ -23,6 +24,18 @@ public class PageController {
     public String authorization(Model model) {
         generatePage("Авторизация", "authorization", model);
         return templateHtml;
+    }
+
+    @GetMapping("/forgotPassword")
+    public String forgotPassword(Model model) {
+        generatePage("Сброс пароля", "forgotPassword", model);
+        return templateHtml;
+    }
+
+    @GetMapping("/resetPassword")
+    public String resetPassword(@RequestParam String token, Model model) {
+        model.addAttribute("token", token);
+        return "resetPassword";
     }
 
     @GetMapping("/registration")
