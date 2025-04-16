@@ -31,4 +31,4 @@ async function checkAuth() {
     }
 }
 
-window.onload = checkAuth;
+window.addEventListener('load', checkAuth);

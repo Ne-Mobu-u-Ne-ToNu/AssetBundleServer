@@ -1,8 +1,10 @@
 package com.usachevsergey.AssetBundleServer.controllers;
 
 import com.usachevsergey.AssetBundleServer.UpdateUserRequest;
+import com.usachevsergey.AssetBundleServer.User;
 import com.usachevsergey.AssetBundleServer.UserDetailsImpl;
 import com.usachevsergey.AssetBundleServer.UserService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +12,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.Map;
 
 @RestController
@@ -46,13 +47,23 @@ public class MainUserController {
 
     @PutMapping("/updateUser")
     public ResponseEntity<?> updateUser(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                        @RequestBody UpdateUserRequest request) {
+                                        @RequestBody UpdateUserRequest request,
+                                        HttpServletResponse response) {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", unauthorizedMessage));
         }
 
-        userService.updateUser(userDetails.getUsername(), request, passwordEncoder);
+        userService.updateUser(userDetails.getUsername(), request, response, passwordEncoder);
         return ResponseEntity.ok(Map.of("message", "Данные пользователя обновлены!"));
+    }
 
+    @PostMapping("/sendVerificationEmail")
+    public ResponseEntity<?> sendVerificationEmail(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", unauthorizedMessage));
+        }
+        userService.sendVerificationEmail(userDetails.getUsername());
+
+        return ResponseEntity.ok(Map.of("message", "Сообщение отправлено на почту!"));
     }
 }

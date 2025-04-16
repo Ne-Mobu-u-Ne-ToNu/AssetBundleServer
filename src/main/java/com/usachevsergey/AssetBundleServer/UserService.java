@@ -1,9 +1,14 @@
 package com.usachevsergey.AssetBundleServer;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import jakarta.servlet.http.Cookie;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +29,8 @@ public class UserService implements UserDetailsService {
     private JavaMailSender javaMailSender;
     @Autowired
     private EmailService emailService;
+    @Autowired
+    private JwtCore jwtCore;
     @Value("${server.app.verTokenLifeHours}")
     private int verifyTokenLifetime;
     @Value("${server.app.verifyEmailLink}")
@@ -73,10 +80,48 @@ public class UserService implements UserDetailsService {
         return user;
     }
 
-    public void updateUser(String username, UpdateUserRequest request, PasswordEncoder passwordEncoder) throws UsernameNotFoundException {
+    public void updateUser(String username, UpdateUserRequest request,
+                             HttpServletResponse response, PasswordEncoder passwordEncoder) throws UsernameNotFoundException {
         User user = getUser(username);
+        boolean changed = false;
 
+        String newData = request.getNewUsername();
+        if (!UserInputValidator.isNullOrEmpty(newData) && !user.getUsername().equals(newData)) {
+            if (userRepository.existsUserByUsername(newData)) {
+                throw new IllegalArgumentException("Выберите другое имя пользователя");
+            }
+            user.setUsername(newData);
+            changed = true;
+        }
+
+        newData = request.getNewEmail();
+        if (!UserInputValidator.isNullOrEmpty(newData) && !user.getEmail().equals(newData) &&
+        UserInputValidator.validateEmail(newData) == null) {
+            if (userRepository.existsUserByEmail(newData)) {
+                throw new IllegalArgumentException("Выберите другой адрес электронной почты");
+            }
+            user.setEmail(newData);
+            user.setEmailVerified(false);
+            changed = true;
+        }
+
+        if (!changed) {
+            throw new IllegalArgumentException("Данные пользователя не обновлены!");
+        }
         userRepository.save(user);
+
+        UserDetails userDetails = loadUserByUsername(user.getUsername());
+        Authentication auth = new UsernamePasswordAuthenticationToken(
+                userDetails,
+                null,
+                userDetails.getAuthorities());
+        String jwt = jwtCore.generateToken(auth);
+
+        Cookie cookie = new Cookie("jwt", jwt);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(jwtCore.getLifetime());
+        response.addCookie(cookie);
     }
 
     public boolean isValidApiKey(String apiKey) {
@@ -91,6 +136,11 @@ public class UserService implements UserDetailsService {
         String message = "Для подтверждения email перейдите по ссылке " + link;
 
         emailService.sendVerificationEmail(user.getEmail(), message, "Подтверждение email");
+    }
+
+    public void sendVerificationEmail(String userName) {
+        User user = getUser(userName);
+        sendVerificationEmail(user);
     }
 
     public void sendResetPasswordEmail(User user) {

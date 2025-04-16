@@ -1,12 +1,69 @@
 <!-- content -->
 <div th:fragment="content">
-  <main></main>
+  <main>
+    <form class="regForm" id="profileForm">
+      <h2>Профиль пользователя</h2>
+      <br>
+
+      <label class="no-star">Имя</label>
+      <input type="text" name="name" id="name" readonly>
+
+      <label class="no-star">Email</label>
+      <input type="email" name="email" id="email" readonly>
+
+      <button type="button" id="editBtn">Редактировать</button>
+      <button type="submit" style="display:none;" id="saveBtn">Сохранить</button>
+
+      <div class="profile-row">
+        <label class="no-star">Email подтверждён:</label>
+        <span id="emailVerified"></span>
+      </div>
+      <button type="button" id="verifyEmail">Подтвердить</button>
+
+      <div class="profile-row">
+        <label class="no-star">API ключ:</label>
+        <span id="apiKey"></span>
+      </div>
+      <button type="button" id="generateApiKey">Сгенерировать</button>
+
+      <div class="profile-row">
+        <label class="no-star">Роль:</label>
+        <span id="role"></span>
+      </div>
+
+      <div class="profile-row">
+        <label class="no-star">Дата регистрации:</label>
+        <span id="createdAt"></span>
+      </div>
+
+      <button type="button" id="deleteBtn">Удалить аккаунт</button>
+    </form>
+
+    <form class="regForm" id="changePasswordForm">
+      <h3>Смена пароля</h3>
+      <br>
+
+      <label for="olpPassw">Старый пароль</label>
+      <input type="password" id="olpPassw" name="olpPassw" placeholder="password***" required = "required">
+
+      <label for="newPassw">Новый пароль</label>
+      <input type="password" id="newPassw" name="newPassw" placeholder="password***" required = "required">
+
+      <label for="passwConf">Подтверждение пароля</label>
+      <input type="password" id="passwConf" name="passwConf" placeholder="Confirm password***" required = "required">
+
+      <button type="submit">Сменить</button>
+      <div class="msg"></div>
+    </form>
+  </main>
 </div>
 
 <!-- extraStyles -->
 <th:block th:fragment="extraStyles">
+  <link rel="stylesheet" href="/css/style_regAuth.css">
 </th:block>
 
 <!-- extraScripts -->
 <th:block th:fragment="extraScripts">
+  <script src="/js/loadUpdateProfileInfo.js"></script>
 </th:block>

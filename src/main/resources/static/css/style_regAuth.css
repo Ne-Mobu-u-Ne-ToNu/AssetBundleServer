@@ -26,6 +26,7 @@
     border: 1px solid black;
     border-radius: 5px;
     margin-top: 15px;
+    margin-bottom: 15px;
     padding:5px;
 }
 
@@ -90,4 +91,21 @@
 .role-options input[type="radio"] {
     margin-right: 10px;
     accent-color: #5ba1d3;
+}
+
+.profile-row {
+    margin-top: 15px;
+}
+
+.profile-row label {
+    display: block;
+    margin-bottom: 3px;
+}
+
+.profile-row span {
+    display: block;
+    padding: 5px;
+    background-color: #eee;
+    border-radius: 5px;
+    font-size: 15px;
 }
