@@ -40,7 +40,8 @@ public class EmailVerifiedAspect {
         String apiKey = request.getHeader("X-API-KEY");
 
         if (apiKey != null && !apiKey.isBlank()) {
-            return userRepository.findUserByApiKey(apiKey);
+            return userRepository.findUserByApiKey(apiKey)
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден!"));
         }
 
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден!");

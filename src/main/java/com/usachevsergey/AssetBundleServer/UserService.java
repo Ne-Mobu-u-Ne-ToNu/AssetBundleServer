@@ -2,11 +2,13 @@ package com.usachevsergey.AssetBundleServer;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -77,7 +79,8 @@ public class UserService implements UserDetailsService {
     }
 
     public boolean isValidApiKey(String apiKey) {
-        User user = userRepository.findUserByApiKey(apiKey);
+        User user = userRepository.findUserByApiKey(apiKey)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден!"));
 
         return user != null;
     }

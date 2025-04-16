@@ -57,13 +57,8 @@ public class MainUserController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", unauthorizedMessage));
         }
 
-        try {
-            userService.updateUser(userDetails.getUsername(), request, passwordEncoder);
-            return ResponseEntity.ok(Map.of("message", "Данные пользователя обновлены!"));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", "Произошла ошибка на сервере"));
-        }
+        userService.updateUser(userDetails.getUsername(), request, passwordEncoder);
+        return ResponseEntity.ok(Map.of("message", "Данные пользователя обновлены!"));
+
     }
 }

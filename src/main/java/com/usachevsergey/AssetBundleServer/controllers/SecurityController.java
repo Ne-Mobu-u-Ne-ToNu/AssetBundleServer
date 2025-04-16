@@ -1,7 +1,6 @@
 package com.usachevsergey.AssetBundleServer.controllers;
 
 import com.usachevsergey.AssetBundleServer.*;
-import com.usachevsergey.AssetBundleServer.annotations.EmailVerifiedOnly;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -49,15 +48,9 @@ public class SecurityController {
 
     @PostMapping("/signup")
     ResponseEntity<?> signup(@RequestBody SignupRequest signupRequest) {
-        try {
-            User user = userService.createUser(signupRequest, passwordEncoder);
-            userService.sendVerificationEmail(user);
-            return ResponseEntity.ok(Map.of("message", "Регистрация прошла успешно!"));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error","Произошла ошибка на сервере!"));
-        }
+        User user = userService.createUser(signupRequest, passwordEncoder);
+        userService.sendVerificationEmail(user);
+        return ResponseEntity.ok(Map.of("message", "Регистрация прошла успешно!"));
     }
 
    @PostMapping("/signin")
@@ -112,54 +105,38 @@ public class SecurityController {
 
     @PostMapping("/resetPassword/request")
     ResponseEntity<?> requestPasswordReset(@RequestParam String email) {
-        try {
-            User user = userRepository.findUserByEmail(email).orElseThrow(() ->
-                    new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь с таким email не найден!"));
+        User user = userRepository.findUserByEmail(email).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь с таким email не найден!"));
 
-            if (!user.isEmailVerified()) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Подтвердите адрес электронной почты!");
-            }
-
-            String message = UserInputValidator.validateEmail(email);
-            if (message != null) {
-                throw new IllegalArgumentException(message);
-            }
-            userService.sendResetPasswordEmail(user);
-
-            return ResponseEntity.ok(Map.of("message", "Сообщение о сбросе пароля отправлено на почту!"));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
-        } catch (ResponseStatusException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error","Произошла ошибка на сервере!"));
+        if (!user.isEmailVerified()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Подтвердите адрес электронной почты!");
         }
+
+        String message = UserInputValidator.validateEmail(email);
+        if (message != null) {
+            throw new IllegalArgumentException(message);
+        }
+        userService.sendResetPasswordEmail(user);
+
+        return ResponseEntity.ok(Map.of("message", "Сообщение о сбросе пароля отправлено на почту!"));
     }
 
     @PostMapping("/resetPassword/confirm")
     ResponseEntity<?> confirmPasswordReset(@RequestBody UpdateUserRequest request) {
-        try {
-            VerificationToken verificationToken = tokenRepository.findByTokenAndType(request.getVerToken(), TokenType.PASSWORD_RESET).orElseThrow(() ->
-                    new ResponseStatusException(HttpStatus.NOT_FOUND, "Токен не найден!"));
+        VerificationToken verificationToken = tokenRepository.findByTokenAndType(request.getVerToken(), TokenType.PASSWORD_RESET).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Токен не найден!"));
 
-            if (!verificationToken.getUser().isEmailVerified()) {
-                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Подтвердите адрес электронной почты!");
-            }
-
-            if (verificationToken.isExpired()) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Токен истек, запросите новый!"));
-            }
-
-            userService.resetUserPassword(verificationToken.getUser(), request, passwordEncoder);
-            tokenRepository.delete(verificationToken);
-
-            return ResponseEntity.ok(Map.of("message", "Пароль обновлен!"));
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
-        } catch (ResponseStatusException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error", e.getMessage()));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(Map.of("error","Произошла ошибка на сервере!"));
+        if (!verificationToken.getUser().isEmailVerified()) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Подтвердите адрес электронной почты!");
         }
+
+        if (verificationToken.isExpired()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Токен истек, запросите новый!"));
+        }
+
+        userService.resetUserPassword(verificationToken.getUser(), request, passwordEncoder);
+        tokenRepository.delete(verificationToken);
+
+        return ResponseEntity.ok(Map.of("message", "Пароль обновлен!"));
     }
 }
