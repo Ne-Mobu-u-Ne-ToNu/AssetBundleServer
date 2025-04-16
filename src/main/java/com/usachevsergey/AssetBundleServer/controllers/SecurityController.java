@@ -110,12 +110,15 @@ public class SecurityController {
         return ResponseEntity.ok(Map.of("message", "Email подтвержден!"));
    }
 
-   @EmailVerifiedOnly
     @PostMapping("/resetPassword/request")
     ResponseEntity<?> requestPasswordReset(@RequestParam String email) {
         try {
             User user = userRepository.findUserByEmail(email).orElseThrow(() ->
                     new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь с таким email не найден!"));
+
+            if (!user.isEmailVerified()) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Подтвердите адрес электронной почты!");
+            }
 
             String message = UserInputValidator.validateEmail(email);
             if (message != null) {
@@ -138,6 +141,10 @@ public class SecurityController {
         try {
             VerificationToken verificationToken = tokenRepository.findByTokenAndType(request.getVerToken(), TokenType.PASSWORD_RESET).orElseThrow(() ->
                     new ResponseStatusException(HttpStatus.NOT_FOUND, "Токен не найден!"));
+
+            if (!verificationToken.getUser().isEmailVerified()) {
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Подтвердите адрес электронной почты!");
+            }
 
             if (verificationToken.isExpired()) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Токен истек, запросите новый!"));

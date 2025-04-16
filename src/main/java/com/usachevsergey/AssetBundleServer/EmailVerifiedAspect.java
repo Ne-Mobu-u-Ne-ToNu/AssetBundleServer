@@ -43,12 +43,6 @@ public class EmailVerifiedAspect {
             return userRepository.findUserByApiKey(apiKey);
         }
 
-        String email = request.getParameter("email");
-        if (email != null && !email.isBlank()) {
-            return userRepository.findUserByEmail(email)
-                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден!"));
-        }
-
         throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Пользователь не найден!");
     }
 }
