@@ -1,6 +1,7 @@
 package com.usachevsergey.AssetBundleServer.controllers;
 
 import com.usachevsergey.AssetBundleServer.*;
+import com.usachevsergey.AssetBundleServer.annotations.EmailVerifiedOnly;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -109,6 +110,7 @@ public class SecurityController {
         return ResponseEntity.ok(Map.of("message", "Email подтвержден!"));
    }
 
+   @EmailVerifiedOnly
     @PostMapping("/resetPassword/request")
     ResponseEntity<?> requestPasswordReset(@RequestParam String email) {
         try {
