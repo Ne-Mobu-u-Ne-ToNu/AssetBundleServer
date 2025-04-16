@@ -17,6 +17,9 @@ public class UserInputValidator {
         if (isNullOrEmpty(signupRequest.getConfPassword())) {
             return "Подтверждение пароля обязательно";
         }
+        if (signupRequest.getRole() == null) {
+            return "Поле роль обязательно для заполнения";
+        }
         return null;
     }
 

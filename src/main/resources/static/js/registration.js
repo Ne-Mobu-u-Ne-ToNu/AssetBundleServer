@@ -22,6 +22,7 @@
       email: document.getElementById('email').value,
       password: password.value,
       confPassword: confirmPassword.value,
+      role: document.querySelector('input[name="role"]:checked').value,
     };
     fetch('/api/public/auth/signup', {
       method: 'POST',

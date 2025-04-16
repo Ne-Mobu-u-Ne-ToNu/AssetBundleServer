@@ -1,6 +1,6 @@
 async function checkAuth() {
     try {
-        const response = await fetch('/api/secured/username', {
+        const response = await fetch('/api/secured/user', {
             method: 'GET',
             credentials: 'include'
         });
@@ -12,7 +12,11 @@ async function checkAuth() {
             document.getElementById("authorizationRef").style.display = "none";
             document.getElementById("profileRef").style.display = "block";
             document.getElementById("myBundlesRef").style.display = "block";
-            document.getElementById("uploadFileRef").style.display = "block";
+            if (data.role === "DEVELOPER") {
+                document.getElementById("uploadFileRef").style.display = "block";
+            } else {
+                document.getElementById("uploadFileRef").style.display = "none";
+            }
             document.getElementById("logoutRef").style.display = "block";
         } else {
             document.getElementById("auth-link").textContent = "Войти";

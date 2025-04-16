@@ -21,13 +21,6 @@ public class MainUserController {
     private final UserService userService;
     private final PasswordEncoder passwordEncoder;
 
-    @GetMapping("/username")
-    public ResponseEntity<?> userAccess(Principal principal) {
-        if (principal == null)
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", unauthorizedMessage));
-        return ResponseEntity.ok(Map.of("username", principal.getName()));
-    }
-
     @GetMapping("/user")
     public ResponseEntity<?> userInfo(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         if (userDetails == null) {
@@ -37,6 +30,7 @@ public class MainUserController {
                 "username", userDetails.getUsername(),
                 "email", userDetails.getEmail(),
                 "api_key", userDetails.getApiKey(),
+                "role", userDetails.getRole(),
                 "email_verified", userDetails.isEmailVerified(),
                 "created_at", userDetails.getCreatedAt()
         ));

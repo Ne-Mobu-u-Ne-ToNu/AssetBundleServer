@@ -67,6 +67,7 @@ public class UserService implements UserDetailsService {
         user.setEmail(signupRequest.getEmail());
         user.setPassword(passwordEncoder.encode(signupRequest.getPassword()));
         user.setApiKey(generateApiKeyAndToken());
+        user.setRole(signupRequest.getRole());
         userRepository.save(user);
 
         return user;

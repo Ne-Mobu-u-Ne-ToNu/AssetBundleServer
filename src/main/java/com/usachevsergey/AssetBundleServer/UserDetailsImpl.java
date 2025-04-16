@@ -3,11 +3,12 @@ package com.usachevsergey.AssetBundleServer;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 
 @Data
 @AllArgsConstructor
@@ -17,6 +18,7 @@ public class UserDetailsImpl implements UserDetails {
     private String userName;
     private String email;
     private String password;
+    private Role role;
     private String apiKey;
     private boolean isEmailVerified;
     private Date createdAt;
@@ -27,6 +29,7 @@ public class UserDetailsImpl implements UserDetails {
                 user.getUsername(),
                 user.getEmail(),
                 user.getPassword(),
+                user.getRole(),
                 user.getApiKey(),
                 user.isEmailVerified(),
                 user.getCreatedAt());
@@ -34,7 +37,7 @@ public class UserDetailsImpl implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return null;
+        return List.of(new SimpleGrantedAuthority(role.name()));
     }
 
     @Override

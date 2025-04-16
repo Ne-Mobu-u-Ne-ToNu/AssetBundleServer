@@ -68,3 +68,26 @@
     content: "*";
     margin-left: 3px;
 }
+
+.regForm label.no-star:after {
+    content: "";
+}
+
+.role-options {
+    display: flex;
+    flex-direction: column;
+    margin: 10px 0;
+    font-weight: 300;
+}
+
+.role-options label {
+    margin-bottom: 5px;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.role-options input[type="radio"] {
+    margin-right: 10px;
+    accent-color: #5ba1d3;
+}
