@@ -25,7 +25,7 @@ document.getElementById('changeForgotPasswordForm').addEventListener('submit', f
       };
 
   fetch('/api/public/auth/resetPassword/confirm', {
-        method: 'POST',
+        method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },

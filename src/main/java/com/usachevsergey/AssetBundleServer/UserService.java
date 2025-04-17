@@ -167,6 +167,13 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
+    public void generateApiKey(String userName) {
+        User user = getUser(userName);
+
+        user.setApiKey(generateApiKeyAndToken());
+        userRepository.save(user);
+    }
+
     private String saveToken(TokenType type, User user) {
         VerificationToken verificationToken = verificationTokenRepository.findByUser(user);
         if (verificationTokenRepository.findByUser(user) == null) {

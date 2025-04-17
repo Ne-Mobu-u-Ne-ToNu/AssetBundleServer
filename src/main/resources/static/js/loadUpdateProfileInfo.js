@@ -98,10 +98,6 @@ document.getElementById('profileForm').addEventListener('submit', function(event
 document.getElementById('verifyEmail').addEventListener('click', function(event) {
     event.preventDefault();
 
-    const formData = {
-          newUsername: name.value,
-          newEmail: email.value,
-        };
         fetch('/api/secured/sendVerificationEmail', {
           method: 'POST',
           credentials: 'include',
@@ -116,6 +112,30 @@ document.getElementById('verifyEmail').addEventListener('click', function(event)
             })
             .then(data => {
                 alert(data.message);
+            })
+            .catch(error => {
+              alert(error.message);
+            });
+});
+
+document.getElementById('generateApiKey').addEventListener('click', function(event) {
+    event.preventDefault();
+
+        fetch('/api/secured/generateApiKey', {
+          method: 'PUT',
+          credentials: 'include',
+        })
+        .then(response => {
+              if (!response.ok) {
+                return response.json().then(data => {
+                  throw new Error(data.error || 'Не удалось сгенерировать Api-ключ!');
+                });
+              }
+              return response.json();
+            })
+            .then(data => {
+                alert(data.message);
+                window.location.reload();
             })
             .catch(error => {
               alert(error.message);

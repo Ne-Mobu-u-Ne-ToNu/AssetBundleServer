@@ -121,7 +121,7 @@ public class SecurityController {
         return ResponseEntity.ok(Map.of("message", "Сообщение о сбросе пароля отправлено на почту!"));
     }
 
-    @PostMapping("/resetPassword/confirm")
+    @PutMapping("/resetPassword/confirm")
     ResponseEntity<?> confirmPasswordReset(@RequestBody UpdateUserRequest request) {
         VerificationToken verificationToken = tokenRepository.findByTokenAndType(request.getVerToken(), TokenType.PASSWORD_RESET).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "Токен не найден!"));

@@ -66,4 +66,14 @@ public class MainUserController {
 
         return ResponseEntity.ok(Map.of("message", "Сообщение отправлено на почту!"));
     }
+
+    @PutMapping("/generateApiKey")
+    public ResponseEntity<?> generateApiKey(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", unauthorizedMessage));
+        }
+        userService.generateApiKey(userDetails.getUsername());
+
+        return ResponseEntity.ok(Map.of("message", "Api-ключ сгенерирован!"));
+    }
 }
