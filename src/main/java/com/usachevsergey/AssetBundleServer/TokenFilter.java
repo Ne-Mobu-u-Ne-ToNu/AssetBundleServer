@@ -1,6 +1,5 @@
 package com.usachevsergey.AssetBundleServer;
 
-import io.jsonwebtoken.ExpiredJwtException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -21,27 +20,21 @@ public class TokenFilter extends OncePerRequestFilter {
 
     @Autowired
     private JwtCore jwtCore;
-
+    @Autowired
+    JwtCookieManager jwtCookieManager;
     @Autowired
     private UserDetailsService userDetailsService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String jwt = null;
+        String jwt;
         String username = null;
         UserDetails userDetails;
         UsernamePasswordAuthenticationToken auth;
 
         try {
-            // Получаем токен из кук
-            Cookie[] cookies = request.getCookies();
-            if (cookies != null) {
-                for (Cookie c : cookies) {
-                    if ("jwt".equals(c.getName())) {
-                        jwt = c.getValue();
-                    }
-                }
-            } else {
+            jwt = jwtCookieManager.extractToken(request);
+            if (jwt == null) {
                 SecurityContextHolder.clearContext();
             }
             if (jwt != null) {
@@ -50,11 +43,7 @@ public class TokenFilter extends OncePerRequestFilter {
                     if (jwtCore.isTokenExpiringSoon(jwt)) {
                         jwt = jwtCore.generateTokenFromExisting(jwt);
 
-                        Cookie cookie = new Cookie("jwt", jwt);
-                        cookie.setHttpOnly(true);
-                        cookie.setPath("/");
-                        cookie.setMaxAge(jwtCore.getLifetime());
-                        response.addCookie(cookie);
+                        jwtCookieManager.saveToken(jwt, response);
                     }
                     // Если с токеном все ок, радуемся, если нет - выбрасывается исключение
                     username = jwtCore.getNameFromJwt(jwt);

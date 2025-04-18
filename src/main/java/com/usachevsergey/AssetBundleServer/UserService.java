@@ -7,7 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
-import jakarta.servlet.http.Cookie;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -31,6 +31,8 @@ public class UserService implements UserDetailsService {
     private EmailService emailService;
     @Autowired
     private JwtCore jwtCore;
+    @Autowired
+    JwtCookieManager jwtCookieManager;
     @Value("${server.app.verTokenLifeHours}")
     private int verifyTokenLifetime;
     @Value("${server.app.verifyEmailLink}")
@@ -115,13 +117,10 @@ public class UserService implements UserDetailsService {
                 userDetails,
                 null,
                 userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(auth);
         String jwt = jwtCore.generateToken(auth);
 
-        Cookie cookie = new Cookie("jwt", jwt);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(jwtCore.getLifetime());
-        response.addCookie(cookie);
+        jwtCookieManager.saveToken(jwt, response);
     }
 
     public boolean isValidApiKey(String apiKey) {

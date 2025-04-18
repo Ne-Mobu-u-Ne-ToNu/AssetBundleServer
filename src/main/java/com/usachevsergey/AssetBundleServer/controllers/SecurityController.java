@@ -1,7 +1,6 @@
 package com.usachevsergey.AssetBundleServer.controllers;
 
 import com.usachevsergey.AssetBundleServer.*;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -24,6 +23,8 @@ public class SecurityController {
     private PasswordEncoder passwordEncoder;
     private AuthenticationManager authenticationManager;
     private JwtCore jwtCore;
+    @Autowired
+    JwtCookieManager jwtCookieManager;
     @Autowired
     private UserService userService;
     @Autowired
@@ -64,21 +65,14 @@ public class SecurityController {
        SecurityContextHolder.getContext().setAuthentication(authentication);
        String jwt = jwtCore.generateToken(authentication);
 
-       Cookie cookie = new Cookie("jwt", jwt);
-       cookie.setHttpOnly(true);
-       cookie.setPath("/");
-       cookie.setMaxAge(jwtCore.getLifetime());
-       response.addCookie(cookie);
+       jwtCookieManager.saveToken(jwt, response);
+
        return ResponseEntity.ok(Map.of("message","Авторизация прошла успешно!"));
    }
 
    @PostMapping("/logout")
     ResponseEntity<?> logout(HttpServletResponse response) {
-        Cookie cookie = new Cookie("jwt", null);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
-        cookie.setMaxAge(0);
-        response.addCookie(cookie);
+        jwtCookieManager.clearToken(response);
 
         SecurityContextHolder.clearContext();
 
