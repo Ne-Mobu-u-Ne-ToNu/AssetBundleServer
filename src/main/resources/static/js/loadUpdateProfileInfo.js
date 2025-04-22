@@ -63,6 +63,34 @@ document.getElementById('editBtn').addEventListener('click', function() {
     saveBtn.style.display = "block";
 });
 
+function updateData(request, method, formData, errorMessage, onSuccessRedirect) {
+            fetch(request, {
+              method: method,
+              credentials: 'include',
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              body: JSON.stringify(formData),
+            })
+            .then(response => {
+                  if (!response.ok) {
+                    return response.json().then(data => {
+                      throw new Error(data.error || errorMessage);
+                    });
+                  }
+                  return response.json();
+                })
+                .then(data => {
+                    alert(data.message);
+                    if (typeof onSuccessRedirect === 'function') {
+                        onSuccessRedirect();
+                    }
+                })
+                .catch(error => {
+                  alert(error.message);
+                });
+}
+
 document.getElementById('profileForm').addEventListener('submit', function(event) {
     event.preventDefault();
 
@@ -70,74 +98,32 @@ document.getElementById('profileForm').addEventListener('submit', function(event
           newUsername: name.value,
           newEmail: email.value,
         };
-        fetch('/api/secured/updateUser', {
-          method: 'PUT',
-          credentials: 'include',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(formData),
-        })
-        .then(response => {
-              if (!response.ok) {
-                return response.json().then(data => {
-                  throw new Error(data.error || 'Не удалось обновить данные!');
-                });
-              }
-              return response.json();
-            })
-            .then(data => {
-                alert(data.message);
-                window.location.reload();
-            })
-            .catch(error => {
-              alert(error.message);
-            });
+
+        updateData('/api/secured/updateUser', 'PUT', formData, 'Не удалось обновить данные!', () => {
+            window.location.reload();
+        });
 });
 
 document.getElementById('verifyEmail').addEventListener('click', function(event) {
     event.preventDefault();
 
-        fetch('/api/secured/sendVerificationEmail', {
-          method: 'POST',
-          credentials: 'include',
-        })
-        .then(response => {
-              if (!response.ok) {
-                return response.json().then(data => {
-                  throw new Error(data.error || 'Не удалось отправить сообщение!');
-                });
-              }
-              return response.json();
-            })
-            .then(data => {
-                alert(data.message);
-            })
-            .catch(error => {
-              alert(error.message);
-            });
+    updateData('/api/secured/sendVerificationEmail', 'POST', null, 'Не удалось отправить сообщение!', () => {
+        window.location.reload();
+    });
 });
 
 document.getElementById('generateApiKey').addEventListener('click', function(event) {
     event.preventDefault();
 
-        fetch('/api/secured/generateApiKey', {
-          method: 'PUT',
-          credentials: 'include',
-        })
-        .then(response => {
-              if (!response.ok) {
-                return response.json().then(data => {
-                  throw new Error(data.error || 'Не удалось сгенерировать Api-ключ!');
-                });
-              }
-              return response.json();
-            })
-            .then(data => {
-                alert(data.message);
-                window.location.reload();
-            })
-            .catch(error => {
-              alert(error.message);
-            });
+        updateData('/api/secured/generateApiKey', 'PUT', null, 'Не удалось сгенерировать Api-ключ!', () => {
+            window.location.reload();
+        });
+});
+
+document.getElementById('deleteBtn').addEventListener('click', function(event) {
+    event.preventDefault();
+
+        updateData('/api/secured/deleteAccount', 'DELETE', null, 'Не удалось удалить аккаунт!', () => {
+            window.location.href = "/";
+        });
 });

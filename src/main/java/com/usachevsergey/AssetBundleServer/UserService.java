@@ -1,6 +1,7 @@
 package com.usachevsergey.AssetBundleServer;
 
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
@@ -171,6 +172,16 @@ public class UserService implements UserDetailsService {
 
         user.setApiKey(generateApiKeyAndToken());
         userRepository.save(user);
+    }
+
+    @Transactional
+    public void deleteAccount(String username, HttpServletResponse response) {
+        User user = getUser(username);
+
+        userRepository.delete(user);
+        jwtCookieManager.clearToken(response);
+
+        SecurityContextHolder.clearContext();
     }
 
     private String saveToken(TokenType type, User user) {

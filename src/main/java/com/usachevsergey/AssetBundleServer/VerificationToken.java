@@ -17,6 +17,7 @@ public class VerificationToken {
     private String token;
     @OneToOne
     @JoinColumn(name = "user_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private User user;
     @Enumerated(EnumType.STRING)
     @Column(name = "token_type", nullable = false)

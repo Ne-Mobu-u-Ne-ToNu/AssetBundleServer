@@ -76,4 +76,15 @@ public class MainUserController {
 
         return ResponseEntity.ok(Map.of("message", "Api-ключ сгенерирован!"));
     }
+
+    @DeleteMapping("/deleteAccount")
+    public ResponseEntity<?> deleteAccount(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                           HttpServletResponse response) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", unauthorizedMessage));
+        }
+        userService.deleteAccount(userDetails.getUsername(), response);
+
+        return ResponseEntity.ok(Map.of("message", "Аккаун удален успешно!"));
+    }
 }
