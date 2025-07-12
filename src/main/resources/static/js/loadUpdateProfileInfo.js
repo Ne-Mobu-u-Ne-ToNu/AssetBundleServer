@@ -6,6 +6,9 @@ const apiKey = document.getElementById('apiKey');
 const role = document.getElementById('role');
 const createdAt = document.getElementById('createdAt');
 const saveBtn = document.getElementById('saveBtn');
+const oldPassword = document.getElementById("olpPassw");
+const password = document.getElementById("newPassw");
+const confirmPassword = document.getElementById("passwConf");
 
 async function loadInfo() {
     try {
@@ -126,4 +129,31 @@ document.getElementById('deleteBtn').addEventListener('click', function(event) {
         updateData('/api/secured/deleteAccount', 'DELETE', null, 'Не удалось удалить аккаунт!', () => {
             window.location.href = "/";
         });
+});
+
+document.addEventListener("DOMContentLoaded", function() {
+    password.addEventListener("input", validatePasswordMessage);
+    confirmPassword.addEventListener("input", checkPasswordsMatch);
+  });
+
+document.getElementById('changePasswordForm').addEventListener('submit', function(event) {
+    setMessageVisibility(false);
+    event.preventDefault();
+
+    if (checkPasswordsMatch() !== null) {
+        return;
+    }
+    if (validatePasswordMessage().length !== 0) {
+        return;
+    }
+
+    const formData = {
+        oldPassword: oldPassword.value,
+        newPassword: password.value,
+        confPassword: confirmPassword.value,
+    };
+
+    updateData('/api/secured/updateUser', 'PUT', formData, 'Ну удалось сменить пароль!', () => {
+        window.location.reload();
+    });
 });

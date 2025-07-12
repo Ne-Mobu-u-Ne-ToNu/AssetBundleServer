@@ -108,6 +108,11 @@ public class UserService implements UserDetailsService {
             changed = true;
         }
 
+        if (!UserInputValidator.isNullOrEmpty(request.getOldPassword())) {
+            changeUserPassword(user, request, passwordEncoder);
+            changed = true;
+        }
+
         if (!changed) {
             throw new IllegalArgumentException("Данные пользователя не обновлены!");
         }
@@ -152,7 +157,7 @@ public class UserService implements UserDetailsService {
 
     public void resetUserPassword(User user, UpdateUserRequest request, PasswordEncoder passwordEncoder) {
         if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
-            throw new IllegalArgumentException("Пароль не должен быть прежним!");
+            throw new IllegalArgumentException("Новый пароль не должен быть прежним!");
         }
         String validation = UserInputValidator.validatePasswordsMatch(request.getNewPassword(), request.getConfPassword());
         if (validation != null) {
@@ -165,6 +170,13 @@ public class UserService implements UserDetailsService {
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
         userRepository.save(user);
+    }
+
+    public void changeUserPassword(User user, UpdateUserRequest request, PasswordEncoder passwordEncoder) {
+        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("Неверный старый пароль!");
+        }
+        resetUserPassword(user, request, passwordEncoder);
     }
 
     public void generateApiKey(String userName) {
