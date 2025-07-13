@@ -1,15 +1,19 @@
 package com.usachevsergey.AssetBundleServer.controllers;
 
 import com.usachevsergey.AssetBundleServer.annotations.EmailVerifiedOnly;
+import com.usachevsergey.AssetBundleServer.database.services.AssetBundleService;
+import com.usachevsergey.AssetBundleServer.requests.AddAssetBundleRequest;
+import com.usachevsergey.AssetBundleServer.security.authorization.UserDetailsImpl;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,12 +27,37 @@ public class FileController {
 
     @Value("${file.upload-dir}")
     private String uploadDir;
+    @Value("${file.thumbnails-dir}")
+    private String thumbnailsDir;
+    @Autowired
+    private AssetBundleService assetBundleService;
 
     @EmailVerifiedOnly
     @PreAuthorize("hasAuthority('DEVELOPER')")
     @PostMapping("/upload")
-    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file) {
-        return saveFile(file);
+    public ResponseEntity<?> uploadFile(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                        @ModelAttribute AddAssetBundleRequest request) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Пользователь не авторизован!"));
+        }
+
+        try {
+            Path targetPath = Path.of(uploadDir, request.getFilename()).toAbsolutePath();
+            Files.copy(request.getBundleFile().getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+
+            for (MultipartFile current : request.getImages()) {
+                targetPath = Path.of(thumbnailsDir, StringUtils.cleanPath(current.getOriginalFilename()))
+                        .toAbsolutePath();
+                Files.copy(current.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+            }
+
+            assetBundleService.uploadAssetBundle(request, userDetails.getUsername());
+
+            return ResponseEntity.ok(Map.of("message", "Файл загружен: " + request.getFilename()));
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    Map.of("error", "Ошибка загрузки файла: " + request.getFilename()));
+        }
     }
 
     @EmailVerifiedOnly
@@ -42,18 +71,6 @@ public class FileController {
                     .body(Map.of("file", fileBytes));
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Не удалось скачать файл!"));
-        }
-    }
-
-    private ResponseEntity<?> saveFile(MultipartFile file) {
-        try {
-            String filename = StringUtils.cleanPath(file.getOriginalFilename());
-            Path targetPath = Path.of(uploadDir, filename).toAbsolutePath();
-            Files.copy(file.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
-            return ResponseEntity.ok(Map.of("message", "Файл загружен: " + filename));
-        } catch (IOException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    Map.of("error", "Ошибка загрузки файла: " + file.getOriginalFilename()));
         }
     }
 }

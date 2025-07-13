@@ -1,9 +1,8 @@
 package com.usachevsergey.AssetBundleServer.controllers;
 
-import com.usachevsergey.AssetBundleServer.UpdateUserRequest;
-import com.usachevsergey.AssetBundleServer.User;
-import com.usachevsergey.AssetBundleServer.UserDetailsImpl;
-import com.usachevsergey.AssetBundleServer.UserService;
+import com.usachevsergey.AssetBundleServer.requests.UpdateUserRequest;
+import com.usachevsergey.AssetBundleServer.security.authorization.UserDetailsImpl;
+import com.usachevsergey.AssetBundleServer.database.services.UserService;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;

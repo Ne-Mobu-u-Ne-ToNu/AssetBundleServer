@@ -1,6 +1,17 @@
 package com.usachevsergey.AssetBundleServer.controllers;
 
-import com.usachevsergey.AssetBundleServer.*;
+import com.usachevsergey.AssetBundleServer.database.enumerations.TokenType;
+import com.usachevsergey.AssetBundleServer.database.repositories.UserRepository;
+import com.usachevsergey.AssetBundleServer.database.repositories.VerificationTokenRepository;
+import com.usachevsergey.AssetBundleServer.database.services.UserService;
+import com.usachevsergey.AssetBundleServer.database.tables.User;
+import com.usachevsergey.AssetBundleServer.database.tables.VerificationToken;
+import com.usachevsergey.AssetBundleServer.requests.SigninRequest;
+import com.usachevsergey.AssetBundleServer.requests.SignupRequest;
+import com.usachevsergey.AssetBundleServer.requests.UpdateUserRequest;
+import com.usachevsergey.AssetBundleServer.security.authorization.JwtCookieManager;
+import com.usachevsergey.AssetBundleServer.security.authorization.JwtCore;
+import com.usachevsergey.AssetBundleServer.security.authorization.UserInputValidator;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

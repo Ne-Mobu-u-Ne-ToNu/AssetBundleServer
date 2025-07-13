@@ -1,13 +1,36 @@
 <!-- content -->
 <div th:fragment="content">
     <main>
-        <div id="drop-area">
-            <p>Перетащите файл сюда или нажмите для выбора файла</p>
-            <input type="file" id="fileElem">
-            <label for="fileElem" id="fileLabel">Выберите файл</label>
-        </div>
-        <button id="uploadBtn">Загрузить</button>
-        <ul id="fileList"></ul>
+        <form id="uploadForm" class="form">
+            <label class="form-label" for="name">Название:</label>
+            <input type="text" name="name" id="name" class="form-input" required>
+
+            <label class="form-label" for="description">Описание:</label>
+            <textarea name="description" id="description" rows="4" class="form-textarea" required></textarea>
+            <br>
+            <br>
+
+            <!-- Drag & Drop для одного bundle файла -->
+            <div id="bundle-drop-area" class="drop-area">
+                <p>Перетащите бандл сюда или нажмите для выбора</p>
+                <input type="file" id="bundleInput" class="fileElem" required>
+                <label for="bundleInput" class="fileLabel">Выбрать файл</label>
+            </div>
+            <br>
+            <div id="bundleFileName"></div>
+            <br>
+
+            <!-- Drag & Drop для нескольких изображений -->
+            <div id="image-drop-area" class="drop-area">
+                <p>Перетащите изображения сюда или нажмите для выбора</p>
+                <input type="file" id="imageInput" class="fileElem" multiple required>
+                <label for="imageInput" class="fileLabel">Выбрать изображения</label>
+            </div>
+            <br>
+            <ul id="imageList"></ul>
+
+            <button type="submit" class="uploadBtn">Загрузить</button>
+        </form>
     </main>
 </div>
 
@@ -18,5 +41,5 @@
 
 <!-- extraScripts -->
 <th:block th:fragment="extraScripts">
-    <script src="/js/uploadFiles.js"></script>
+    <script src="/js/manageFiles.js"></script>
 </th:block>

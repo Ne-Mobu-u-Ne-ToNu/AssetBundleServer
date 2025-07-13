@@ -1,5 +1,6 @@
 package com.usachevsergey.AssetBundleServer.controllers;
 
+import com.usachevsergey.AssetBundleServer.annotations.EmailVerifiedOnly;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -49,6 +50,12 @@ public class PageController {
     @GetMapping("/secured/profile")
     public String profile(Model model) {
         generatePage("Профиль", "profile", model);
+        return templateHtml;
+    }
+
+    @GetMapping("/store")
+    public String store(Model model) {
+        generatePage("Магазин", "store", model);
         return templateHtml;
     }
 

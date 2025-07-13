@@ -1,21 +1,27 @@
+.form{
+display:flex;
+flex-direction: column;
+width: 300px;
+margin: auto;
+}
+
 /* Стили для области перетаскивания файлов */
-#drop-area {
+.drop-area {
     border: 2px dashed #ccc;
     padding: 20px;
     text-align: center;
     width: 400px;
-    margin: auto;
 }
 
-#drop-area.hover {
+.drop-area.hover {
     background-color: #f0f0f0;
 }
 
-#fileElem {
+.fileElem {
     display: none;
 }
 
-#fileLabel {
+.fileLabel {
     display: inline-block;
     padding: 10px 20px;
     background-color: #8cbbd3;
@@ -27,16 +33,16 @@
     transition: background-color 0.3s ease;
 }
 
-#fileLabel:hover {
+.fileLabel:hover {
     background-color: #5ba1d3;
 }
 
-#fileList {
+.fileList {
     list-style-type: none;
     padding-left: 0;
 }
 
-#fileList li {
+.fileList li {
     background-color: #fff;
     margin: 5px 0;
     padding: 10px;
@@ -45,7 +51,7 @@
 }
 
 /* Стили для кнопки загрузки */
-#uploadBtn {
+.uploadBtn {
     background-color: #8cbbd3;
     color: #ffffff;
     border: 1px solid black;
@@ -54,18 +60,46 @@
     cursor: pointer;
     border-radius: 5px;
     transition: background-color 0.3s ease;
+    margin-top:20px;
+    width:150px
 }
 
-#uploadBtn:hover {
+.uploadBtn:hover {
     background-color: #5ba1d3;
 }
 
 /* Для обработки перетаскивания файлов */
-#drop-area.dragover {
+.drop-area.dragover {
     background-color: #e1f7e1;
     border-color: #45a049;
 }
 
-#drop-area.dragover p {
+.drop-area.dragover p {
     color: #45a049;
+}
+
+.form-label {
+    display: block;
+    margin-top: 15px;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.form-input,
+.form-textarea {
+    width: 100%;
+    max-width: 400px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    box-sizing: border-box;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.form-input:focus,
+.form-textarea:focus {
+    border-color: #5ba1d3;
+    box-shadow: 0 0 5px rgba(91, 161, 211, 0.5);
+    outline: none;
 }
