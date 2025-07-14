@@ -22,7 +22,6 @@ import java.nio.file.StandardCopyOption;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api/private")
 public class FileController {
 
     @Value("${file.upload-dir}")
@@ -34,7 +33,7 @@ public class FileController {
 
     @EmailVerifiedOnly
     @PreAuthorize("hasAuthority('DEVELOPER')")
-    @PostMapping("/upload")
+    @PostMapping("/api/secured/upload")
     public ResponseEntity<?> uploadFile(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                         @ModelAttribute AddAssetBundleRequest request) {
         if (userDetails == null) {
@@ -60,8 +59,13 @@ public class FileController {
         }
     }
 
+    @GetMapping("/api/public/allBundles")
+    public ResponseEntity<?> getAllBundles() {
+        return ResponseEntity.ok(assetBundleService.getAllBundles());
+    }
+
     @EmailVerifiedOnly
-    @GetMapping("/download/{filename}")
+    @GetMapping("/api/private/download/{filename}")
     public ResponseEntity<?> downloadFile(@PathVariable String filename) {
         try {
             Path filepath = Path.of(uploadDir, filename).toAbsolutePath();

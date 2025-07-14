@@ -1,12 +1,16 @@
 <!-- content -->
 <div th:fragment="content">
-  <main></main>
+  <main>
+    <div id="bundle-list" class="bundle-container"></div>
+  </main>
 </div>
 
 <!-- extraStyles -->
 <th:block th:fragment="extraStyles">
+  <link rel="stylesheet" href="/css/style_store.css">
 </th:block>
 
 <!-- extraScripts -->
 <th:block th:fragment="extraScripts">
+  <script src="/js/bundle-list.js"></script>
 </th:block>

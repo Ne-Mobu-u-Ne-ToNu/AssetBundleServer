@@ -83,40 +83,10 @@ document.addEventListener("DOMContentLoaded", () => {
             formData.append("images", imageFiles[i]);
         }
 
-        async function getApiKey() {
-            try {
-                const response = await fetch('/api/secured/apiKey', {
-                    method: 'GET',
-                    credentials: 'include'
-                });
-
-                if (!response.ok) {
-                    return response.json().then(data => {
-                        throw new Error(data.error || "Не удалось получить API-ключ!");
-                    })
-                }
-
-                const data = await response.json();
-                return data.api_key;
-            } catch (error) {
-                alert(error.message);
-                return null;
-            }
-        }
-
-        async function uploadFile() {
-            const apiKey = await getApiKey();
-            if (!apiKey) {
-                return;
-            }
-
             // Отправляем файл на сервер с помощью fetch
-            fetch('/api/private/upload', {
+            fetch('/api/secured/upload', {
                 method: 'POST',
                 body: formData,
-                headers: {
-                    'X-API-KEY': apiKey
-                }
             })
             .then(response => {
                 if (!response.ok) {
@@ -132,9 +102,6 @@ document.addEventListener("DOMContentLoaded", () => {
             .catch(error => {
                 alert(error.message);
             });
-        }
-
-        uploadFile();
     });
 });
 
