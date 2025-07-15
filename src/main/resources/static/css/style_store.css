@@ -1,13 +1,13 @@
 .bundle-container {
   display: flex;
   flex-direction: column;
-  gap: 2rem;
   max-width: 1000px;
   margin: 0 auto;
   padding: 2rem;
 }
 
 .bundle-card {
+  margin-bottom: 4rem;
   background-color: #fff;
   border-radius: 16px;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
@@ -71,15 +71,65 @@
   background: #007bff;
 }
 
-.bundle-search {
+#render-on-page {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+#bundle-search {
+  margin-bottom: 2rem;
   display: block;
   padding: 0.5rem;
   font-size: 1rem;
 }
 
-.sort-select {
+#sort-select, #max-elem-page{
+  margin-top: 0.5rem;
   padding: 0.25rem;
   font-size: 1rem;
   align-items: center;
   max-width: 200px;
+}
+
+#max-elem-page {
+  max-width: 50px;
+}
+
+#pagination {
+  display: flex;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 1rem;
+  flex-wrap: wrap;
+}
+
+#pagination button {
+  padding: 0.4rem 0.8rem;
+  font-size: 1rem;
+  border: 1px solid #ddd;
+  background: #f9f9f9;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+
+#pagination button:hover:not(:disabled) {
+  background: #eee;
+}
+
+#pagination button.active {
+  background: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+#pagination button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pagination-dots {
+  padding: 0.4rem 0.6rem;
+  color: #888;
 }

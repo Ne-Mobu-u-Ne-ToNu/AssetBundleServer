@@ -8,13 +8,29 @@
               class="bundle-search"
               placeholder="Поиск по названию..."
       >
-      <select id="sort-select" class="sort-select">
-        <option value="name">по названию</option>
-        <option value="date_desc">сначала новее</option>
-        <option value="date_asc">сначала старее</option>
-      </select>
+      <div id="render-on-page">
+        <div class="render-control">
+          <label for="sort-select">Сортировка:</label>
+          <select id="sort-select" class="sort-select">
+            <option value="name">по названию</option>
+            <option value="date_desc">сначала новее</option>
+            <option value="date_asc">сначала старее</option>
+          </select>
+        </div>
+
+        <div class="render-control">
+          <label for="max-elem-page">Элементов на странице:</label>
+          <select id="max-elem-page">
+            <option value="12" selected>12</option>
+            <option value="24">24</option>
+            <option value="48">48</option>
+            <option value="96">96</option>
+          </select>
+        </div>
+      </div>
     </div>
     <div id="bundle-list" class="bundle-container"></div>
+    <div id="pagination"></div>
   </main>
 </div>
 

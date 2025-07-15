@@ -62,8 +62,10 @@ public class FileController {
     @GetMapping("/api/public/search")
     public ResponseEntity<?> searchAssetBundles(
             @RequestParam(required = false, defaultValue = "") String name,
-            @RequestParam(required = false, defaultValue = "name") String sort) {
-        return ResponseEntity.ok(assetBundleService.getBundlesBySearch(name, sort));
+            @RequestParam(defaultValue = "name") String sort,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "12") int size) {
+        return ResponseEntity.ok(assetBundleService.getBundlesBySearch(name, sort, page, size));
     }
 
     @EmailVerifiedOnly

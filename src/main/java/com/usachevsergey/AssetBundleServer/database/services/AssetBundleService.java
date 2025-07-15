@@ -9,11 +9,15 @@ import com.usachevsergey.AssetBundleServer.database.tables.AssetBundleInfo;
 import com.usachevsergey.AssetBundleServer.requests.AddAssetBundleRequest;
 import com.usachevsergey.AssetBundleServer.security.authorization.UserInputValidator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class AssetBundleService {
@@ -36,33 +40,31 @@ public class AssetBundleService {
         saveImages(assetBundle, request.getImagesNames());
     }
 
-    public List<AssetBundleDTO> getAllBundles() {
-        List<AssetBundleInfo> allBundles = assetBundleInfoRepository.findAll();
-
-        return createDTOFromInfo(allBundles);
-    }
-
-    public List<AssetBundleDTO> getBundlesBySearch(String name, String sort) {
-        List<AssetBundleInfo> bundles;
+    public Map<String, ?> getBundlesBySearch(String name, String sort,
+                                                   int page, int size) {
+        Page<AssetBundleInfo> bundlesPage;
+        Pageable pageable;
         SortOption sortOption = SortOption.getFromString(sort);
 
-        if (UserInputValidator.isNullOrEmpty(name)) {
-            switch (sortOption) {
-                case NAME -> bundles = assetBundleInfoRepository.findAllByOrderByNameAsc();
-                case DATE_ASC -> bundles = assetBundleInfoRepository.findAllByOrderByUploadedAtAsc();
-                case DATE_DESC -> bundles = assetBundleInfoRepository.findAllByOrderByUploadedAtDesc();
-                default -> throw new IllegalArgumentException("Ну удалось выполнить сортировку!");
-            }
-        } else {
-            switch (sortOption) {
-                case NAME -> bundles = assetBundleInfoRepository.findByNameContainingIgnoreCaseOrderByNameAsc(name);
-                case DATE_ASC -> bundles = assetBundleInfoRepository.findByNameContainingIgnoreCaseOrderByUploadedAtAsc(name);
-                case DATE_DESC -> bundles = assetBundleInfoRepository.findByNameContainingIgnoreCaseOrderByUploadedAtDesc(name);
-                default -> throw new IllegalArgumentException("Ну удалось выполнить сортировку!");
-            }
+        switch (sortOption) {
+            case NAME -> pageable = PageRequest.of(page, size, Sort.by("name").ascending());
+            case DATE_ASC -> pageable = PageRequest.of(page, size, Sort.by("uploadedAt").ascending());
+            case DATE_DESC -> pageable = PageRequest.of(page, size, Sort.by("uploadedAt").descending());
+            default -> throw new IllegalArgumentException("Ну удалось выполнить сортировку!");
         }
 
-        return createDTOFromInfo(bundles);
+        if (UserInputValidator.isNullOrEmpty(name)) {
+            bundlesPage = assetBundleInfoRepository.findAll(pageable);
+        } else {
+            bundlesPage = assetBundleInfoRepository.findByNameContainingIgnoreCase(name, pageable);
+        }
+
+        return Map.of(
+                "bundles", createDTOFromInfo(bundlesPage.getContent()),
+                "totalPages", bundlesPage.getTotalPages(),
+                "currentPage", page,
+                "totalElements", bundlesPage.getTotalElements()
+        );
     }
 
     private List<AssetBundleDTO> createDTOFromInfo(List<AssetBundleInfo> info) {
