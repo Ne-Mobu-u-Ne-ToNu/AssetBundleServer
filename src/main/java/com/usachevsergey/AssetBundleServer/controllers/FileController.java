@@ -59,14 +59,11 @@ public class FileController {
         }
     }
 
-    @GetMapping("/api/public/allBundles")
-    public ResponseEntity<?> getAllBundles() {
-        return ResponseEntity.ok(assetBundleService.getAllBundles());
-    }
-
     @GetMapping("/api/public/search")
-    public ResponseEntity<?> searchAssetBundles(@RequestParam("name") String name) {
-        return ResponseEntity.ok(assetBundleService.getBundlesByName(name));
+    public ResponseEntity<?> searchAssetBundles(
+            @RequestParam(required = false, defaultValue = "") String name,
+            @RequestParam(required = false, defaultValue = "name") String sort) {
+        return ResponseEntity.ok(assetBundleService.getBundlesBySearch(name, sort));
     }
 
     @EmailVerifiedOnly

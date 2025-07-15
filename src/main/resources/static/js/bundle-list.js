@@ -1,4 +1,6 @@
 let allBundles = [];
+const bundle_search = document.getElementById("bundle-search");
+const sortSelect = document.getElementById("sort-select");
 
 function showBundles(bundles) {
   const container = document.getElementById("bundle-list");
@@ -74,29 +76,25 @@ function showBundles(bundles) {
   });
 }
 
-fetch("/api/public/allBundles")
-  .then(res => res.json())
-  .then(data => {
-    allBundles = data;
-    showBundles(allBundles);
+function fetchBundles() {
+  const query = bundle_search.value.toLowerCase();
+
+  fetch(`/api/public/search?name=${encodeURIComponent(query)}&sort=${sortSelect.value}`)
+    .then(res => res.json())
+    .then(data => {
+    showBundles(data);
   });
+}
+
+fetchBundles();
 
 let debounceTimer;
-document.getElementById("bundle-search").addEventListener("input", function () {
+bundle_search.addEventListener("input", function () {
   clearTimeout(debounceTimer);
 
   debounceTimer = setTimeout(() => {
-    const query = this.value.toLowerCase();
-
-    if (query.length == 0) {
-      showBundles(allBundles);
-      return;
-    }
-
-    fetch(`/api/public/search?name=${encodeURIComponent(query)}`)
-      .then(res => res.json())
-      .then(data => {
-      showBundles(data);
-    });
+    fetchBundles();
   }, 500);
 })
+
+sortSelect.addEventListener("change", fetchBundles);
