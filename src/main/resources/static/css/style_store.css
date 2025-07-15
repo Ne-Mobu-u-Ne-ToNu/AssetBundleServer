@@ -70,3 +70,9 @@
 .dot.active {
   background: #007bff;
 }
+
+.bundle-search {
+  display: block;
+  padding: 0.5rem;
+  font-size: 1rem;
+}

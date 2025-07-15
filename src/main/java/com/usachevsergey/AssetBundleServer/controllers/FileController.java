@@ -64,6 +64,11 @@ public class FileController {
         return ResponseEntity.ok(assetBundleService.getAllBundles());
     }
 
+    @GetMapping("/api/public/search")
+    public ResponseEntity<?> searchAssetBundles(@RequestParam("name") String name) {
+        return ResponseEntity.ok(assetBundleService.getBundlesByName(name));
+    }
+
     @EmailVerifiedOnly
     @GetMapping("/api/private/download/{filename}")
     public ResponseEntity<?> downloadFile(@PathVariable String filename) {

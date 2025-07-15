@@ -37,7 +37,17 @@ public class AssetBundleService {
     public List<AssetBundleDTO> getAllBundles() {
         List<AssetBundleInfo> allBundles = assetBundleInfoRepository.findAll();
 
-        return allBundles.stream().map(bundle -> {
+        return createDTOFromInfo(allBundles);
+    }
+
+    public List<AssetBundleDTO> getBundlesByName(String name) {
+        List<AssetBundleInfo> bundles = assetBundleInfoRepository.searchByName(name);
+
+        return createDTOFromInfo(bundles);
+    }
+
+    private List<AssetBundleDTO> createDTOFromInfo(List<AssetBundleInfo> info) {
+        return info.stream().map(bundle -> {
             List<AssetBundleImage> images = assetBundleImageRepository.findImagesByAssetBundle(bundle).orElseThrow(() ->
                     new ResponseStatusException(HttpStatus.NOT_FOUND, "Изображения не найдены!"));
             List<String> paths = images.stream()
