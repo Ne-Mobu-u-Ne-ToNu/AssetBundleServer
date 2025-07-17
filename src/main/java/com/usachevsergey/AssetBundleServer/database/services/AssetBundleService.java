@@ -67,24 +67,33 @@ public class AssetBundleService {
         );
     }
 
-    private List<AssetBundleDTO> createDTOFromInfo(List<AssetBundleInfo> info) {
-        return info.stream().map(bundle -> {
-            List<AssetBundleImage> images = assetBundleImageRepository.findImagesByAssetBundle(bundle).orElseThrow(() ->
-                    new ResponseStatusException(HttpStatus.NOT_FOUND, "Изображения не найдены!"));
-            List<String> paths = images.stream()
-                    .map(AssetBundleImage::getPath)
-                    .toList();
+    public AssetBundleDTO getBundleById(Long id) {
+        AssetBundleInfo assetBundleInfo = assetBundleInfoRepository.findById(id).orElseThrow(() ->
+                new IllegalArgumentException("Не удалось найти бандл!"));
 
-            return new AssetBundleDTO(
-                    bundle.getId(),
-                    bundle.getName(),
-                    bundle.getDescription(),
-                    bundle.getFilename(),
-                    bundle.getUploadedAt(),
-                    bundle.getUploadedBy(),
-                    paths
-            );
-        }).toList();
+        return createDTOFromInfo(assetBundleInfo);
+    }
+
+    private List<AssetBundleDTO> createDTOFromInfo(List<AssetBundleInfo> info) {
+        return info.stream().map(this::createDTOFromInfo).toList();
+    }
+
+    private AssetBundleDTO createDTOFromInfo(AssetBundleInfo info) {
+        List<AssetBundleImage> images = assetBundleImageRepository.findImagesByAssetBundle(info).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Изображения не найдены!"));
+        List<String> paths = images.stream()
+                .map(AssetBundleImage::getPath)
+                .toList();
+
+        return new AssetBundleDTO(
+                info.getId(),
+                info.getName(),
+                info.getDescription(),
+                info.getFilename(),
+                info.getUploadedAt(),
+                info.getUploadedBy(),
+                paths
+        );
     }
 
     private void saveImages(AssetBundleInfo assetBundle, List<String> imageList) {

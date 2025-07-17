@@ -1,0 +1,37 @@
+<!-- content -->
+<div th:fragment="content">
+    <main class="bundle-page">
+        <h1 id="bundle-name"></h1>
+        <div class="bundle-content">
+            <div class="image-gallery">
+                <div class="main-image-wrapper">
+                    <img id="main-image" src="" alt="Главное изображение">
+                </div>
+                <div class="thumbnail-list" id="thumbnail-list"></div>
+            </div>
+
+            <div class="bundle-details">
+                <p id="bundle-description"></p>
+                <p id="uploaded-by"></p>
+                <p class="upload-date" id="bundle-uploaded-at"></p>
+            </div>
+        </div>
+
+        <div id="image-modal" class="image-modal">
+            <span class="close-modal">&times;</span>
+            <div class="modal-inner">
+                <img class="modal-content" id="modal-image" src="">
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- extraStyles -->
+<th:block th:fragment="extraStyles">
+    <link rel="stylesheet" href="/css/style_bundle.css">
+</th:block>
+
+<!-- extraScripts -->
+<th:block th:fragment="extraScripts">
+    <script src="/js/bundle-details.js"></script>
+</th:block>
