@@ -1,6 +1,5 @@
 package com.usachevsergey.AssetBundleServer.requests;
 
-import com.usachevsergey.AssetBundleServer.database.tables.User;
 import lombok.*;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -14,26 +13,28 @@ public class AddAssetBundleRequest {
     private String name;
     private String description;
     @Setter(AccessLevel.NONE)
+    @Getter(AccessLevel.NONE)
     private String filename;
     private Date uploadedAt;
     @Setter(AccessLevel.NONE)
+    @Getter(AccessLevel.NONE)
     private List<String> imagesNames;
     private MultipartFile bundleFile;
     private List<MultipartFile> images;
 
-    public String getFilename() {
+    public String getFilename(Long userId) {
         if (bundleFile != null) {
-            return StringUtils.cleanPath(bundleFile.getOriginalFilename());
+            return StringUtils.cleanPath(userId + "_" + bundleFile.getOriginalFilename());
         } else {
             return null;
         }
     }
 
-    public List<String> getImagesNames() {
+    public List<String> getImagesNames(Long userId) {
         if (images != null) {
             List<String> result = new ArrayList<>();
             for (MultipartFile file : images) {
-                result.add(StringUtils.cleanPath(file.getOriginalFilename()));
+                result.add(StringUtils.cleanPath(userId + "_" + file.getOriginalFilename()));
             }
             return result;
         } else {

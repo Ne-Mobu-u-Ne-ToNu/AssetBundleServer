@@ -2,6 +2,8 @@ package com.usachevsergey.AssetBundleServer.controllers;
 
 import com.usachevsergey.AssetBundleServer.annotations.EmailVerifiedOnly;
 import com.usachevsergey.AssetBundleServer.database.services.AssetBundleService;
+import com.usachevsergey.AssetBundleServer.database.services.UserService;
+import com.usachevsergey.AssetBundleServer.database.tables.User;
 import com.usachevsergey.AssetBundleServer.requests.AddAssetBundleRequest;
 import com.usachevsergey.AssetBundleServer.security.authorization.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,8 @@ public class FileController {
     private String thumbnailsDir;
     @Autowired
     private AssetBundleService assetBundleService;
+    @Autowired
+    private UserService userService;
 
     @EmailVerifiedOnly
     @PreAuthorize("hasAuthority('DEVELOPER')")
@@ -40,22 +44,24 @@ public class FileController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Пользователь не авторизован!"));
         }
 
+        User user = userService.getUser(userDetails.getUsername());
+
         try {
-            Path targetPath = Path.of(uploadDir, request.getFilename()).toAbsolutePath();
-            Files.copy(request.getBundleFile().getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+            Path targetPath = Path.of(uploadDir, request.getFilename(user.getId())).toAbsolutePath();
+            Files.copy(request.getBundleFile().getInputStream(), targetPath);
 
             for (MultipartFile current : request.getImages()) {
-                targetPath = Path.of(thumbnailsDir, StringUtils.cleanPath(current.getOriginalFilename()))
+                targetPath = Path.of(thumbnailsDir, user.getId() + "_" + StringUtils.cleanPath(current.getOriginalFilename()))
                         .toAbsolutePath();
-                Files.copy(current.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(current.getInputStream(), targetPath);
             }
 
-            assetBundleService.uploadAssetBundle(request, userDetails.getUsername());
+            assetBundleService.uploadAssetBundle(request, user);
 
-            return ResponseEntity.ok(Map.of("message", "Файл загружен: " + request.getFilename()));
+            return ResponseEntity.ok(Map.of("message", "Файл загружен: " + request.getFilename(user.getId())));
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
-                    Map.of("error", "Ошибка загрузки файла: " + request.getFilename()));
+                    Map.of("error", "Ошибка загрузки файла: " + request.getFilename(user.getId())));
         }
     }
 

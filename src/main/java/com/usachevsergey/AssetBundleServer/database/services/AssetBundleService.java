@@ -6,6 +6,7 @@ import com.usachevsergey.AssetBundleServer.database.repositories.AssetBundleImag
 import com.usachevsergey.AssetBundleServer.database.repositories.AssetBundleInfoRepository;
 import com.usachevsergey.AssetBundleServer.database.tables.AssetBundleImage;
 import com.usachevsergey.AssetBundleServer.database.tables.AssetBundleInfo;
+import com.usachevsergey.AssetBundleServer.database.tables.User;
 import com.usachevsergey.AssetBundleServer.requests.AddAssetBundleRequest;
 import com.usachevsergey.AssetBundleServer.security.authorization.UserInputValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,18 +27,16 @@ public class AssetBundleService {
     private AssetBundleInfoRepository assetBundleInfoRepository;
     @Autowired
     private AssetBundleImageRepository assetBundleImageRepository;
-    @Autowired
-    private UserService userService;
 
-    public void uploadAssetBundle(AddAssetBundleRequest request, String username) {
+    public void uploadAssetBundle(AddAssetBundleRequest request, User user) {
         AssetBundleInfo assetBundle = new AssetBundleInfo();
-        assetBundle.setUploadedBy(userService.getUser(username));
+        assetBundle.setUploadedBy(user);
         assetBundle.setName(request.getName());
         assetBundle.setDescription(request.getDescription());
-        assetBundle.setFilename(request.getFilename());
+        assetBundle.setFilename(request.getFilename(user.getId()));
         assetBundleInfoRepository.save(assetBundle);
 
-        saveImages(assetBundle, request.getImagesNames());
+        saveImages(assetBundle, request.getImagesNames(user.getId()));
     }
 
     public Map<String, ?> getBundlesBySearch(String name, String sort,
