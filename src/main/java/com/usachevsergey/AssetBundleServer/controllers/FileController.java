@@ -80,6 +80,7 @@ public class FileController {
     }
 
     @EmailVerifiedOnly
+    @PreAuthorize("hasAuthority('USER')")
     @GetMapping("/api/private/download/{filename}")
     public ResponseEntity<?> downloadFile(@PathVariable String filename) {
         try {

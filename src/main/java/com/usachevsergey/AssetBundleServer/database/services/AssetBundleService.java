@@ -67,17 +67,19 @@ public class AssetBundleService {
     }
 
     public AssetBundleDTO getBundleById(Long id) {
-        AssetBundleInfo assetBundleInfo = assetBundleInfoRepository.findById(id).orElseThrow(() ->
-                new IllegalArgumentException("Не удалось найти бандл!"));
+        return createDTOFromInfo(getBundle(id));
+    }
 
-        return createDTOFromInfo(assetBundleInfo);
+    public AssetBundleInfo getBundle(Long id) {
+        return assetBundleInfoRepository.findById(id).orElseThrow(() ->
+                new IllegalArgumentException("Не удалось найти бандл!"));
     }
 
     private List<AssetBundleDTO> createDTOFromInfo(List<AssetBundleInfo> info) {
         return info.stream().map(this::createDTOFromInfo).toList();
     }
 
-    private AssetBundleDTO createDTOFromInfo(AssetBundleInfo info) {
+    public AssetBundleDTO createDTOFromInfo(AssetBundleInfo info) {
         List<AssetBundleImage> images = assetBundleImageRepository.findImagesByAssetBundle(info).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "Изображения не найдены!"));
         List<String> paths = images.stream()

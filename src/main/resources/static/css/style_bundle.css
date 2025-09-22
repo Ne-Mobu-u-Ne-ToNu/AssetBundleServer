@@ -17,6 +17,19 @@
     gap: 1rem;
 }
 
+.btn-add-to-cart {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    padding: 4px 8px;
+}
+
+.btn-add-to-cart:hover {
+    background-color: #0056b3;
+}
+
 .image-gallery {
     display: flex;
     flex-direction: column;
