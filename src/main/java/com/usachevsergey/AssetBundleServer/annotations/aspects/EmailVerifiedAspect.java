@@ -21,7 +21,8 @@ public class EmailVerifiedAspect {
     @Autowired
     private UserRepository userRepository;
 
-    @Before("@annotation(com.usachevsergey.AssetBundleServer.annotations.EmailVerifiedOnly)")
+    @Before("@annotation(com.usachevsergey.AssetBundleServer.annotations.EmailVerifiedOnly) || " +
+            "@within(com.usachevsergey.AssetBundleServer.annotations.EmailVerifiedOnly)")
     public void checkEmailVerified() {
         User user = extractUser();
 

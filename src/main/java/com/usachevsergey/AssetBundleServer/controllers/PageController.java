@@ -5,7 +5,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 
 @Controller
@@ -63,6 +62,13 @@ public class PageController {
     @GetMapping("/bundle/{id}")
     public String bundle(Model model) {
         generatePage("Загрузка...", "bundle", model);
+        return templateHtml;
+    }
+
+    @PreAuthorize("hasAuthority('USER')")
+    @GetMapping("/cart")
+    public String cart(Model model) {
+        generatePage("Корзина", "cart", model);
         return templateHtml;
     }
 

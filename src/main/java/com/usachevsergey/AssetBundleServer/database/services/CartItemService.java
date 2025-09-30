@@ -5,6 +5,7 @@ import com.usachevsergey.AssetBundleServer.database.repositories.CartItemReposit
 import com.usachevsergey.AssetBundleServer.database.tables.AssetBundleInfo;
 import com.usachevsergey.AssetBundleServer.database.tables.CartItem;
 import com.usachevsergey.AssetBundleServer.database.tables.User;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +28,11 @@ public class CartItemService {
         cartItem.setAssetBundle(bundle);
 
         cartItemRepository.save(cartItem);
+    }
+
+    @Transactional
+    public void removeFromCart(User user, AssetBundleInfo bundle) {
+        cartItemRepository.deleteByUserAndAssetBundle(user, bundle);
     }
 
     public List<AssetBundleDTO> getUserCart(User user) {

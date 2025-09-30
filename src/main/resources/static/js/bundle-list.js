@@ -11,6 +11,16 @@ function showBundles(bundles) {
     const card = document.createElement("div");
     card.className = "bundle-card";
 
+    const cartButton = document.createElement("button");
+    cartButton.className = "btn-add-to-cart";
+    cartButton.dataset.bundleId = bundle.id;
+    cartButton.textContent = "🛒 Добавить в корзину";
+
+    const buyWrapper = document.createElement("div");
+    buyWrapper.className = "buy-wrapper";
+    buyWrapper.appendChild(cartButton);
+
+
     const title = document.createElement("h3");
     title.className = "bundle-title";
     title.innerHTML = `<a href="/bundle/${bundle.id}">${bundle.name}</a>`;
@@ -72,8 +82,11 @@ function showBundles(bundles) {
     card.appendChild(description);
     card.appendChild(wrapper);
     card.appendChild(indicators);
+    card.appendChild(buyWrapper);
 
     container.appendChild(card);
+
+    createCartButtonsLogic();
   });
 }
 

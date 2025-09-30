@@ -1,5 +1,6 @@
 package com.usachevsergey.AssetBundleServer.security.filters;
 
+import com.usachevsergey.AssetBundleServer.security.exceptopionHandlers.JsonSecurityHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -47,6 +48,8 @@ public class SecurityConfigurator {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+        JsonSecurityHandler jsonSecurityHandler = new JsonSecurityHandler();
+
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .cors(httpSecurityCorsConfigurer ->
@@ -54,7 +57,8 @@ public class SecurityConfigurator {
                                 new CorsConfiguration().applyPermitDefaultValues())
                 )
                 .exceptionHandling(exceptions -> exceptions
-                        .authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED))
+                        .authenticationEntryPoint(jsonSecurityHandler)
+                        .accessDeniedHandler(jsonSecurityHandler)
                 )
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)

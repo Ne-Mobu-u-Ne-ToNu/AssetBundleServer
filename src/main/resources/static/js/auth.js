@@ -17,6 +17,13 @@ async function checkAuth() {
             } else {
                 document.getElementById("uploadFileRef").style.display = "none";
             }
+
+            if (data.role === "USER") {
+                document.getElementById("cartRef").style.display = "block";
+            } else {
+                document.getElementById("cartRef").style.display = "none";
+            }
+
             document.getElementById("logoutRef").style.display = "block";
         } else {
             document.getElementById("auth-link").textContent = "Войти";
@@ -25,6 +32,7 @@ async function checkAuth() {
             document.getElementById("myBundlesRef").style.display = "none";
             document.getElementById("uploadFileRef").style.display = "none";
             document.getElementById("logoutRef").style.display = "none";
+            document.getElementById("cartRef").style.display = "none";
         }
     } catch (error) {
         alert("Ошибка при проверке авторизации " + error.message);

@@ -16,6 +16,8 @@ fetch(`/api/public/bundle/${bundleId}`)
         document.getElementById('uploaded-by').textContent = 'Автор: ' + data.uploadedBy.username;
         document.getElementById('bundle-uploaded-at').textContent =
         'Загружено: ' + new Date(data.uploadedAt).toLocaleDateString();
+        document.getElementById('btn-add-to-cart').dataset.bundleId = bundleId;
+        createCartButtonsLogic();
 
         const mainImage = document.getElementById('main-image');
         const thumbnailList = document.getElementById('thumbnail-list');
