@@ -15,10 +15,12 @@ function createCartButtonsLogic() {
          }
       }))
 
-      btn.addEventListener('click', () => {
+      btn.onclick = () => {
          const inCart = btn.dataset.inCart === "true";
          const url = inCart ? `/api/secured/cart/remove/${bundleId}` : `/api/secured/cart/add/${bundleId}`;
          const method = inCart ? 'DELETE' : 'POST';
+         const badge = document.getElementById("cart-badge");
+         const current = inCart ? parseInt(badge.textContent) - 1 : parseInt(badge.textContent) + 1;
 
          fetch(url, { method: method})
             .then(res => res.json().then(data => {
@@ -35,8 +37,9 @@ function createCartButtonsLogic() {
                alert(data.message);
                btn.dataset.inCart = (!inCart).toString();
                btn.textContent = inCart ? "🛒 Добавить в корзину" : "🛒 Удалить из корзины";
+               updateCartBadge(current);
             })
             .catch(err => alert(err.message));
-      });
+      };
    });
 }

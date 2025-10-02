@@ -1,16 +1,20 @@
 <!-- content -->
 <div th:fragment="content">
     <main>
-
+        <div id="cart-container">
+            <h2 id="cart-text">Ваша корзина пуста</h2>
+            <div id="cart-list"></div>
+            <button id="checkout-btn">Оформить покупку</button>
+        </div>
     </main>
 </div>
 
 <!-- extraStyles -->
 <th:block th:fragment="extraStyles">
-
+    <link rel="stylesheet" href="/css/style_cart.css">
 </th:block>
 
 <!-- extraScripts -->
 <th:block th:fragment="extraScripts">
-
+    <script src="/js/cartList.js"></script>
 </th:block>

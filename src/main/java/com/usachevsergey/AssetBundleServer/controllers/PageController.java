@@ -66,7 +66,7 @@ public class PageController {
     }
 
     @PreAuthorize("hasAuthority('USER')")
-    @GetMapping("/cart")
+    @GetMapping("/secured/cart")
     public String cart(Model model) {
         generatePage("Корзина", "cart", model);
         return templateHtml;
