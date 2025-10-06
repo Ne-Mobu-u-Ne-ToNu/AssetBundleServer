@@ -1,0 +1,20 @@
+<!-- content -->
+<div th:fragment="content">
+  <main>
+    <div id="card-container">
+      <h2 id="card-text"></h2>
+      <div id="card-list"></div>
+    </div>
+  </main>
+</div>
+
+<!-- extraStyles -->
+<th:block th:fragment="extraStyles">
+  <link rel="stylesheet" href="/css/style_cardItems.css">
+</th:block>
+
+<!-- extraScripts -->
+<th:block th:fragment="extraScripts">
+  <script src="/js/myBundlesOperations.js"></script>
+  <script src="/js/renderCardItems.js"></script>
+</th:block>

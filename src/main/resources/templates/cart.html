@@ -1,9 +1,9 @@
 <!-- content -->
 <div th:fragment="content">
     <main>
-        <div id="cart-container">
-            <h2 id="cart-text">Ваша корзина пуста</h2>
-            <div id="cart-list"></div>
+        <div id="card-container">
+            <h2 id="card-text"></h2>
+            <div id="card-list"></div>
             <button id="checkout-btn">Оформить покупку</button>
         </div>
     </main>
@@ -11,10 +11,11 @@
 
 <!-- extraStyles -->
 <th:block th:fragment="extraStyles">
-    <link rel="stylesheet" href="/css/style_cart.css">
+    <link rel="stylesheet" href="/css/style_cardItems.css">
 </th:block>
 
 <!-- extraScripts -->
 <th:block th:fragment="extraScripts">
+    <script src="/js/renderCardItems.js"></script>
     <script src="/js/cartList.js"></script>
 </th:block>

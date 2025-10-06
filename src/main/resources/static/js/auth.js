@@ -1,4 +1,8 @@
+let userData = null;
+
 async function checkAuth() {
+    if (userData) return userData;
+
     try {
         const response = await fetch('/api/secured/user', {
             method: 'GET',
@@ -7,6 +11,7 @@ async function checkAuth() {
 
         if (response.ok) {
             const data = await response.json();
+            userData = data;
 
             document.getElementById("auth-link").textContent = data.username;
             document.getElementById("authorizationRef").style.display = "none";
@@ -25,6 +30,8 @@ async function checkAuth() {
             }
 
             document.getElementById("logoutRef").style.display = "block";
+
+            return data;
         } else {
             document.getElementById("auth-link").textContent = "Войти";
             document.getElementById("authorizationRef").style.display = "block";
@@ -33,9 +40,12 @@ async function checkAuth() {
             document.getElementById("uploadFileRef").style.display = "none";
             document.getElementById("logoutRef").style.display = "none";
             document.getElementById("cartRef").style.display = "none";
+
+            return null;
         }
     } catch (error) {
         alert("Ошибка при проверке авторизации " + error.message);
+        return null;
     }
 }
 

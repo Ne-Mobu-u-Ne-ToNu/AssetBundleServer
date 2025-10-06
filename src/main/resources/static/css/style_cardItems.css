@@ -1,4 +1,4 @@
-#cart-container {
+#card-container {
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -7,7 +7,7 @@
     padding: 1rem;
 }
 
-.cart-item-card {
+.card-item-card {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -20,17 +20,17 @@
     transition: box-shadow 0.3s;
 }
 
-.cart-item-card:hover {
+.card-item-card:hover {
     box-shadow: 0 6px 16px rgba(0,0,0,0.08);
 }
 
-.cart-item-left {
+.card-item-left {
     display: flex;
     align-items: center;
     gap: 1rem;
 }
 
-.cart-item-left img {
+.card-item-left img {
     width: 80px;
     height: 80px;
     object-fit: cover;
@@ -38,18 +38,41 @@
     border: 1px solid #ddd;
 }
 
-.cart-item-left a {
+.card-item-left a {
     font-size: 1.1rem;
     font-weight: 500;
     color: #007bff;
     text-decoration: none;
 }
 
-.cart-item-left a:hover {
+.card-item-left a:hover {
     text-decoration: underline;
 }
 
-.cart-item-right button {
+.card-item-right #edit-btn, #download-btn {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 6px 12px;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-right: 20px;
+}
+
+.card-item-right #edit-btn:hover {
+    background-color: #0056b3;
+}
+
+.card-item-right #download-btn {
+    background-color: #28a745;
+}
+
+.card-item-right #download-btn:hover {
+    background-color: #218838;
+}
+
+.card-item-right #delete-btn {
     background-color: #ff5b5b;
     color: white;
     border: none;
@@ -59,7 +82,7 @@
     transition: background 0.2s;
 }
 
-.cart-item-right button:hover {
+.card-item-right #delete-btn:hover {
     background-color: #d94646;
 }
 

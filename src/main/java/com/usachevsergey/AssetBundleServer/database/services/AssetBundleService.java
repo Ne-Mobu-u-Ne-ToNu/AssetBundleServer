@@ -70,6 +70,10 @@ public class AssetBundleService {
         return createDTOFromInfo(getBundle(id));
     }
 
+    public List<AssetBundleDTO> getBundlesByDeveloper(User user) {
+        return createDTOFromInfo(assetBundleInfoRepository.findByUploadedBy(user));
+    }
+
     public AssetBundleInfo getBundle(Long id) {
         return assetBundleInfoRepository.findById(id).orElseThrow(() ->
                 new IllegalArgumentException("Не удалось найти бандл!"));

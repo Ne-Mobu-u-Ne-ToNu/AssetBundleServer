@@ -1,6 +1,7 @@
 package com.usachevsergey.AssetBundleServer.controllers;
 
 import com.usachevsergey.AssetBundleServer.annotations.EmailVerifiedOnly;
+import com.usachevsergey.AssetBundleServer.database.enumerations.Role;
 import com.usachevsergey.AssetBundleServer.database.services.AssetBundleService;
 import com.usachevsergey.AssetBundleServer.database.services.UserService;
 import com.usachevsergey.AssetBundleServer.database.tables.User;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
@@ -91,6 +93,27 @@ public class FileController {
                     .body(Map.of("file", fileBytes));
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Не удалось скачать файл!"));
+        }
+    }
+
+    @EmailVerifiedOnly
+    @GetMapping("/api/secured/myBundles")
+    public ResponseEntity<?> getUserBundles(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        Role role = Role.valueOf(userDetails.getAuthorities().stream()
+                .findFirst()
+                .map(GrantedAuthority::getAuthority)
+                .orElse(null));
+
+        User user = userService.getUser(userDetails.getUsername());
+
+        switch (role) {
+            case USER -> {
+                throw new UnsupportedOperationException();
+            }
+            case DEVELOPER -> {
+                return ResponseEntity.ok(Map.of("myBundles", assetBundleService.getBundlesByDeveloper(user)));
+            }
+            default -> throw new UnsupportedOperationException();
         }
     }
 }

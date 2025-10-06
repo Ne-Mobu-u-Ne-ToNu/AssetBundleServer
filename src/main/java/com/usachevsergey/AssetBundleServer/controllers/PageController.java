@@ -17,6 +17,7 @@ public class PageController {
         return templateHtml;
     }
     @PreAuthorize("hasAuthority('DEVELOPER')")
+    @EmailVerifiedOnly
     @GetMapping("/secured/uploadFile")
     public String files(Model model) {
         generatePage("Загрузка файла", "uploadFile", model);
@@ -66,9 +67,17 @@ public class PageController {
     }
 
     @PreAuthorize("hasAuthority('USER')")
+    @EmailVerifiedOnly
     @GetMapping("/secured/cart")
     public String cart(Model model) {
         generatePage("Корзина", "cart", model);
+        return templateHtml;
+    }
+
+    @EmailVerifiedOnly
+    @GetMapping("/secured/myBundles")
+    public String myBundles(Model model) {
+        generatePage("Мои бандлы", "myBundles", model);
         return templateHtml;
     }
 
