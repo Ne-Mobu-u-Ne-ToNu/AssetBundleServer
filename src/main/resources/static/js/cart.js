@@ -1,7 +1,7 @@
 function updateCartBadge(count) {
     const badge = document.getElementById("cart-badge");
+    badge.textContent = count;
     if (count > 0) {
-        badge.textContent = count;
         badge.style.display = "block";
     } else {
         badge.style.display = "none";

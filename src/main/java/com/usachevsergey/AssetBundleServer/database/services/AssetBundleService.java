@@ -4,9 +4,11 @@ import com.usachevsergey.AssetBundleServer.database.dto.AssetBundleDTO;
 import com.usachevsergey.AssetBundleServer.database.enumerations.SortOption;
 import com.usachevsergey.AssetBundleServer.database.repositories.AssetBundleImageRepository;
 import com.usachevsergey.AssetBundleServer.database.repositories.AssetBundleInfoRepository;
+import com.usachevsergey.AssetBundleServer.database.repositories.UserBundleRepository;
 import com.usachevsergey.AssetBundleServer.database.tables.AssetBundleImage;
 import com.usachevsergey.AssetBundleServer.database.tables.AssetBundleInfo;
 import com.usachevsergey.AssetBundleServer.database.tables.User;
+import com.usachevsergey.AssetBundleServer.database.tables.UserBundle;
 import com.usachevsergey.AssetBundleServer.requests.AddAssetBundleRequest;
 import com.usachevsergey.AssetBundleServer.security.authorization.UserInputValidator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +29,8 @@ public class AssetBundleService {
     private AssetBundleInfoRepository assetBundleInfoRepository;
     @Autowired
     private AssetBundleImageRepository assetBundleImageRepository;
+    @Autowired
+    private UserBundleRepository userBundleRepository;
 
     public void uploadAssetBundle(AddAssetBundleRequest request, User user) {
         AssetBundleInfo assetBundle = new AssetBundleInfo();
@@ -79,10 +83,6 @@ public class AssetBundleService {
                 new IllegalArgumentException("Не удалось найти бандл!"));
     }
 
-    private List<AssetBundleDTO> createDTOFromInfo(List<AssetBundleInfo> info) {
-        return info.stream().map(this::createDTOFromInfo).toList();
-    }
-
     public AssetBundleDTO createDTOFromInfo(AssetBundleInfo info) {
         List<AssetBundleImage> images = assetBundleImageRepository.findImagesByAssetBundle(info).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "Изображения не найдены!"));
@@ -101,6 +101,20 @@ public class AssetBundleService {
         );
     }
 
+    public void purchaseBundles(User user, List<AssetBundleInfo> bundles) {
+        for (AssetBundleInfo bundle : bundles) {
+            purchaseBundle(user, bundle);
+        }
+    }
+
+    public List<AssetBundleDTO> getBundlesByUser(User user) {
+        return createDTOFromInfo(userBundleRepository.findBundlesByUser(user));
+    }
+
+    private List<AssetBundleDTO> createDTOFromInfo(List<AssetBundleInfo> info) {
+        return info.stream().map(this::createDTOFromInfo).toList();
+    }
+
     private void saveImages(AssetBundleInfo assetBundle, List<String> imageList) {
         for (String current : imageList) {
             AssetBundleImage assetBundleImage = new AssetBundleImage();
@@ -108,5 +122,16 @@ public class AssetBundleService {
             assetBundleImage.setPath(current);
             assetBundleImageRepository.save(assetBundleImage);
         }
+    }
+
+    private void purchaseBundle(User user, AssetBundleInfo assetBundle) {
+        if (userBundleRepository.existsByUserAndAssetBundle(user, assetBundle)) {
+            throw new IllegalStateException("Бандл уже куплен!");
+        }
+
+        UserBundle userBundle = new UserBundle();
+        userBundle.setUser(user);
+        userBundle.setAssetBundle(assetBundle);
+        userBundleRepository.save(userBundle);
     }
 }

@@ -9,6 +9,10 @@ function renderCardItems(bundlesInCard, mode, role) {
     if (mode === "cart") {
         if (bundlesInCard.length > 0) {
             checkoutBtn.style.display = "block";
+            checkoutBtn.addEventListener("click", () => {
+                purchaseBundles(bundlesInCard);
+            });
+
             cardText.textContent = "Ваша корзина"
         } else {
             checkoutBtn.style.display = "none";
@@ -39,7 +43,7 @@ function renderCardItems(bundlesInCard, mode, role) {
         const right = document.createElement("div");
         right.className = "card-item-right";
 
-        if (role == "USER" || role === "DEVELOPER") {
+        if ((role === "USER" || role === "DEVELOPER") && mode != "cart") {
             const downloadBtn = document.createElement("button");
             downloadBtn.id = "download-btn";
             downloadBtn.textContent = "Скачать";
@@ -49,7 +53,7 @@ function renderCardItems(bundlesInCard, mode, role) {
             right.appendChild(downloadBtn);
         }
 
-        if (role === "DEVELOPER") {
+        if (role === "DEVELOPER" && mode != "cart") {
             const editBtn = document.createElement("button");
             editBtn.id = "edit-btn";
             editBtn.textContent = "Редактировать";

@@ -2,8 +2,11 @@ package com.usachevsergey.AssetBundleServer.controllers;
 
 import com.usachevsergey.AssetBundleServer.annotations.EmailVerifiedOnly;
 import com.usachevsergey.AssetBundleServer.database.enumerations.Role;
+import com.usachevsergey.AssetBundleServer.database.repositories.CartItemRepository;
 import com.usachevsergey.AssetBundleServer.database.services.AssetBundleService;
+import com.usachevsergey.AssetBundleServer.database.services.CartItemService;
 import com.usachevsergey.AssetBundleServer.database.services.UserService;
+import com.usachevsergey.AssetBundleServer.database.tables.AssetBundleInfo;
 import com.usachevsergey.AssetBundleServer.database.tables.User;
 import com.usachevsergey.AssetBundleServer.requests.AddAssetBundleRequest;
 import com.usachevsergey.AssetBundleServer.security.authorization.UserDetailsImpl;
@@ -23,6 +26,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -36,6 +40,8 @@ public class FileController {
     private AssetBundleService assetBundleService;
     @Autowired
     private UserService userService;
+    @Autowired
+    private CartItemService cartItemService;
 
     @EmailVerifiedOnly
     @PreAuthorize("hasAuthority('DEVELOPER')")
@@ -108,12 +114,28 @@ public class FileController {
 
         switch (role) {
             case USER -> {
-                throw new UnsupportedOperationException();
+                return ResponseEntity.ok(Map.of("myBundles", assetBundleService.getBundlesByUser(user)));
             }
             case DEVELOPER -> {
                 return ResponseEntity.ok(Map.of("myBundles", assetBundleService.getBundlesByDeveloper(user)));
             }
             default -> throw new UnsupportedOperationException();
         }
+    }
+
+    @EmailVerifiedOnly
+    @PreAuthorize("hasAuthority('USER')")
+    @PostMapping("/api/secured/purchase/all")
+    public ResponseEntity<?> purchaseBundles(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                            @RequestBody List<Long> bundleIds) {
+        User user = userService.getUser(userDetails.getUsername());
+        List<AssetBundleInfo> assetBundles = bundleIds.stream()
+                .map(assetBundleService::getBundle)
+                .toList();
+
+        assetBundleService.purchaseBundles(user, assetBundles);
+        cartItemService.removeFromCart(user, assetBundles);
+
+        return ResponseEntity.ok(Map.of("message", "Бандлы успешно куплены!"));
     }
 }

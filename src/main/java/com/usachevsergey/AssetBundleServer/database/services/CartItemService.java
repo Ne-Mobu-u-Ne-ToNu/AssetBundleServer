@@ -2,6 +2,7 @@ package com.usachevsergey.AssetBundleServer.database.services;
 
 import com.usachevsergey.AssetBundleServer.database.dto.AssetBundleDTO;
 import com.usachevsergey.AssetBundleServer.database.repositories.CartItemRepository;
+import com.usachevsergey.AssetBundleServer.database.repositories.UserBundleRepository;
 import com.usachevsergey.AssetBundleServer.database.tables.AssetBundleInfo;
 import com.usachevsergey.AssetBundleServer.database.tables.CartItem;
 import com.usachevsergey.AssetBundleServer.database.tables.User;
@@ -17,8 +18,14 @@ public class CartItemService {
     private CartItemRepository cartItemRepository;
     @Autowired
     private AssetBundleService assetBundleService;
+    @Autowired
+    private UserBundleRepository userBundleRepository;
 
     public void addToCart(User user, AssetBundleInfo bundle) {
+        if (userBundleRepository.existsByUserAndAssetBundle(user, bundle)) {
+            throw new IllegalStateException("Бандл уже куплен!");
+        }
+
         if (cartItemRepository.existsByUserAndAssetBundle(user, bundle)) {
             throw new IllegalStateException("Бандл уже в корзине!");
         }
@@ -33,6 +40,13 @@ public class CartItemService {
     @Transactional
     public void removeFromCart(User user, AssetBundleInfo bundle) {
         cartItemRepository.deleteByUserAndAssetBundle(user, bundle);
+    }
+
+    @Transactional
+    public void removeFromCart(User user, List<AssetBundleInfo> assetBundles) {
+        for (AssetBundleInfo assetBundle : assetBundles) {
+            cartItemRepository.deleteByUserAndAssetBundle(user, assetBundle);
+        }
     }
 
     public List<AssetBundleDTO> getUserCart(User user) {
