@@ -152,3 +152,130 @@
         top: 20px;
     }
 }
+
+#comments-section {
+    margin-top: 2rem;
+    border-top: 1px solid #ccc;
+    padding-top: 1rem;
+    font-family: "Inter", sans-serif;
+}
+
+.comment {
+    position: relative;
+    background: #f9f9f9;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+    padding: 0.75rem 1rem;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+    transition: background 0.2s;
+}
+
+.comment:hover {
+    background: #f1f8ff;
+}
+
+.comment b {
+    color: #333;
+    font-size: 1rem;
+}
+
+.comment p {
+    margin: 0.4rem 0 0.6rem 0;
+    line-height: 1.4;
+    word-break: break-word;
+}
+
+.comment span {
+    font-size: 0.8rem;
+    color: #666;
+}
+
+.comment button {
+    background: none;
+    border: none;
+    color: #007bff;
+    cursor: pointer;
+    margin-right: 0.5rem;
+    font-size: 0.85rem;
+    transition: color 0.2s;
+}
+
+.comment button:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
+
+.comment .delete-comment,
+.comment .cancel-inline {
+    color: #ff5b5b;
+}
+
+.comment .delete-comment:hover,
+.comment .cancel-inline:hover {
+    color: #d94646;;
+}
+
+.comment .edit-comment {
+    color: #28a745;
+}
+
+.comment .edit-comment:hover {
+    color: #218838;
+}
+
+#comment-input {
+    width: 100%;
+    height: 80px;
+    margin-top: .5rem;
+    padding: .5rem;
+}
+
+.replies {
+    margin-left: 1.5rem;
+    border-left: 2px solid #e0e0e0;
+    padding-left: 1rem;
+    margin-top: 0.75rem;
+}
+
+#comment-submit {
+    background-color: #007bff;
+    color: white;
+    margin-top: .5rem;
+    padding: .5rem 1rem;
+}
+
+#comment-submit:hover{
+    background-color: #0056b3;
+}
+
+.inline-form {
+    margin-top: 0.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.inline-textarea {
+    width: 100%;
+    min-height: 60px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    padding: 6px;
+    resize: vertical;
+    font-family: inherit;
+}
+
+.comment .badge-author {
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    padding: 2px 6px;
+    font-size: 0.8rem;
+    margin-left: 6px;
+    font-weight: 500;
+}
+
+.comment.author-comment {
+    border-left: 3px solid #007bff;
+    padding-left: 0.75rem;
+}
