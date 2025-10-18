@@ -9,6 +9,7 @@ import com.usachevsergey.AssetBundleServer.database.tables.AssetBundleInfo;
 import com.usachevsergey.AssetBundleServer.database.tables.Comment;
 import com.usachevsergey.AssetBundleServer.database.tables.User;
 import com.usachevsergey.AssetBundleServer.security.authorization.UserDetailsImpl;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -55,8 +56,7 @@ public class CommentController {
             currentUser = userService.getUser(userDetails.getUsername());
         }
 
-        List<CommentDTO> comments = commentService.getComments(assetBundleService.getBundle(bundleId), currentUser);
-        return ResponseEntity.ok(comments);
+        return ResponseEntity.ok(commentService.getComments(assetBundleService.getBundle(bundleId), currentUser));
     }
 
     @EmailVerifiedOnly
@@ -85,5 +85,16 @@ public class CommentController {
         commentService.deleteComment(user, comment);
 
         return ResponseEntity.ok(Map.of("message", "Комментарий удален!"));
+    }
+
+    @EmailVerifiedOnly
+    @PutMapping("/api/secured/comments/like/{commentId}")
+    @Transactional
+    public ResponseEntity<?> likeComment(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                         @PathVariable Long commentId) {
+        User user = userService.getUser(userDetails.getUsername());
+        Comment comment = commentService.getCommentById(commentId);
+
+        return ResponseEntity.ok(Map.of("liked", commentService.toggleLike(comment, user)));
     }
 }

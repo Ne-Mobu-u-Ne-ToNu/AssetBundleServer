@@ -1,10 +1,15 @@
 async function loadComments(bundleId) {
     const res = await fetch(`/api/public/bundles/${bundleId}/comments`);
     if (res.ok) {
-        const comments = await res.json();
+        const data = await res.json();
+        const comments = data.comments;
         const list = document.getElementById("comments-list");
+        const title = document.getElementById("comment-title");
 
         await renderComments(comments, list, bundleId);
+        if (data.count > 0) {
+            title.textContent = title.textContent + " (" + data.count + ")";
+        }
 
         document.querySelectorAll(".delete-comment").forEach(btn => {
             btn.onclick = async () => {
@@ -23,10 +28,37 @@ async function loadComments(bundleId) {
                 }
             };
         });
+
+        document.querySelectorAll(".like-comment").forEach(btn => {
+            btn.onclick = async () => {
+                const commentId = btn.dataset.id;
+                const res = await fetch(`/api/secured/comments/like/${commentId}`, { method: "PUT" });
+                const data = await res.json();
+
+                if (res.ok) {
+                    const countSpan = btn.querySelector(".like-count");
+                    let count = parseInt(countSpan.textContent);
+
+                    if (data.liked) {
+                        btn.classList.add("liked");
+                        countSpan.textContent = count + 1;
+                    } else {
+                        btn.classList.remove("liked");
+                        countSpan.textContent = count - 1;
+                    }
+
+                } else {
+                    if (res.status === 401) {
+                        window.location.href = "/authorization";
+                    }
+                    alert(data.error || "Ошибка при лайке комментария!");
+                }
+            };
+        });
     }
 }
 
-async function renderComments(comments, container, bundleId) {
+function renderComments(comments, container, bundleId) {
     container.innerHTML = "";
     comments.forEach(c => {
         const div = document.createElement("div");
@@ -41,7 +73,9 @@ async function renderComments(comments, container, bundleId) {
 
         let html = `${nameHtml} <span>(${new Date(c.createdAt).toLocaleString()}) ${edited}</span>
         <p>${c.text}</p>
-        <button class="reply-comment" data-author="${c.authorName}" data-id="${c.id}">Ответить</button>`;
+        <button class="reply-comment" data-author="${c.authorName}" data-id="${c.id}">Ответить</button>
+        <button class="like-comment ${c.likedByUser ? 'liked' : ''}" data-id="${c.id}">👍 <span class="like-count">${c.likes}</span>
+        </button>`;
 
         if (c.author) {
             html += `<button class="edit-comment" data-id="${c.id}" data-text="${encodeURIComponent(c.text)}">Редактировать</button>

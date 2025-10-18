@@ -5,7 +5,9 @@ import lombok.Data;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "comment")
@@ -29,6 +31,14 @@ public class Comment {
     private boolean isEdited = false;
 
     private Instant createdAt = Instant.now();
+
+    @ManyToMany
+    @JoinTable(
+            name = "comment_likes",
+            joinColumns = @JoinColumn(name = "comment_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> likedBy = new HashSet<>();
 
     @Transient
     private List<Comment> replies = new ArrayList<>();

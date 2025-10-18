@@ -9,4 +9,5 @@ import java.util.List;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
     List<Comment> findByBundleAndParentCommentIsNullOrderByCreatedAtAsc(AssetBundleInfo bundle);
     List<Comment> findByParentCommentOrderByCreatedAtAsc(Comment parent);
+    Long countByBundle(AssetBundleInfo bundle);
 }

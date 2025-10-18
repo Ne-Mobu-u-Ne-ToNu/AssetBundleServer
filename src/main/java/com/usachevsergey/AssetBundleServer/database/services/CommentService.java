@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class CommentService {
@@ -32,12 +33,18 @@ public class CommentService {
         commentRepository.save(comment);
     }
 
-    public List<CommentDTO> getComments(AssetBundleInfo bundle, User currentUser) {
+    @Transactional
+    public Map<?,?> getComments(AssetBundleInfo bundle, User currentUser) {
         List<Comment> rootComments = commentRepository.findByBundleAndParentCommentIsNullOrderByCreatedAtAsc(bundle);
 
-        return rootComments.stream()
+        List<CommentDTO> allComments = rootComments.stream()
                 .map(c -> mapToDto(c, bundle, currentUser))
                 .toList();
+
+        Long count = commentRepository.countByBundle(bundle);
+
+        return Map.of("comments", allComments,
+                "count", count);
     }
 
     public CommentDTO mapToDto(Comment comment, AssetBundleInfo bundle, User currentUser) {
@@ -49,6 +56,8 @@ public class CommentService {
         result.setEdited(comment.isEdited());
         result.setAuthor(comment.getAuthor().equals(currentUser));
         result.setBundleAuthor(comment.getAuthor().getId().equals(bundle.getUploadedBy().getId()));
+        result.setLikes(comment.getLikedBy().size());
+        result.setLikedByUser(comment.getLikedBy().contains(currentUser));
 
         List<Comment> replies = commentRepository.findByParentCommentOrderByCreatedAtAsc(comment);
         for (Comment reply : replies) {
@@ -91,5 +100,19 @@ public class CommentService {
             deleteReplies(reply);
             commentRepository.delete(reply);
         }
+    }
+
+    public boolean toggleLike(Comment comment, User user) {
+        boolean added;
+        if (comment.getLikedBy().contains(user)) {
+            comment.getLikedBy().remove(user);
+            added = false;
+        } else {
+            comment.getLikedBy().add(user);
+            added = true;
+        }
+
+        commentRepository.save(comment);
+        return added;
     }
 }

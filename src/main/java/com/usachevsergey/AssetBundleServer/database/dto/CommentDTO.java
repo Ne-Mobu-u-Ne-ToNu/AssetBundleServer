@@ -15,5 +15,7 @@ public class CommentDTO {
     private boolean isAuthor;
     private boolean isEdited;
     private boolean isBundleAuthor;
+    private int likes;
+    private boolean likedByUser;
     private List<CommentDTO> replies = new ArrayList<>();
 }
