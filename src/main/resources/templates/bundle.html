@@ -31,6 +31,29 @@
             <textarea id="comment-input" placeholder="Напишите комментарий..."></textarea>
             <button id="comment-submit">Отправить</button>
             </br></br></br>
+
+            <div class="render-comment-params">
+                <div class="sort-comment-params">
+                    <label for="sort-comments">Сортировка:</label>
+                    <select id="sort-comments">
+                        <option value="date_asc">Сначала старые</option>
+                        <option value="date_desc">Сначала новые</option>
+                        <option value="popularity_desc">Популярные</option>
+                        <option value="popularity_asc">Менее популярные</option>
+                    </select>
+                </div>
+
+                <div class="max-elem-params">
+                    <label for="max-elem-page">Комментариев на странице:</label>
+                    <select id="max-elem-page">
+                        <option value="10" selected>10</option>
+                        <option value="20">20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+            </div>
+
             <div id="comments-list"></div>
         </div>
     </main>

@@ -1,66 +1,58 @@
-async function loadComments(bundleId) {
-    const res = await fetch(`/api/public/bundles/${bundleId}/comments`);
+const maxElemPage = document.getElementById("max-elem-page");
+const sortComments = document.getElementById("sort-comments");
+const addRootComments = 10;
+const replyCommentsLimit = 5;
+
+let commentsPage = 0;
+let commentsLimit = parseInt(maxElemPage.value);
+let commentsSortBy = sortComments.value;
+let loadedRootComments = 0;
+
+async function loadComments(bundleId, reset = false) {
+    if (reset) {
+        commentsPage = 0;
+        commentsLimit = parseInt(maxElemPage.value);
+        commentsSortBy = sortComments.value;
+        loadedRootComments = 0;
+    }
+
+    const res = await fetch(`/api/public/bundles/${bundleId}/comments?page=${commentsPage}&limit=${commentsLimit}&sort=${commentsSortBy}`);
     if (res.ok) {
         const data = await res.json();
         const comments = data.comments;
         const list = document.getElementById("comments-list");
         const title = document.getElementById("comment-title");
 
+        if (reset) list.innerHTML = "";
         await renderComments(comments, list, bundleId);
+
         if (data.count > 0) {
-            title.textContent = title.textContent + " (" + data.count + ")";
+            title.textContent = "Комментарии (" + data.count + ")";
+        }
+        loadedRootComments += comments.length;
+
+        let showMoreBtn = document.getElementById("show-more-root");
+        if (!showMoreBtn) {
+            showMoreBtn = document.createElement("button");
+            showMoreBtn.id = "show-more-root";
+            showMoreBtn.textContent = "Показать ещё";
+            showMoreBtn.addEventListener("click", () => {
+                commentsLimit = addRootComments;
+                commentsPage++;
+                loadComments(bundleId);
+            });
         }
 
-        document.querySelectorAll(".delete-comment").forEach(btn => {
-            btn.onclick = async () => {
-                if (!confirm("Удалить комментарий?")) return;
+        list.parentNode.appendChild(showMoreBtn);
 
-                const commentId = btn.dataset.id;
-                const res = await fetch(`/api/secured/comments/delete/${commentId}`, { method: "DELETE" });
-
-                if (res.ok) {
-                    loadComments(bundleId);
-                } else {
-                    if (res.status === 401) {
-                        window.location.href = "/authorization";
-                    }
-                    alert((await res.json()).error);
-                }
-            };
-        });
-
-        document.querySelectorAll(".like-comment").forEach(btn => {
-            btn.onclick = async () => {
-                const commentId = btn.dataset.id;
-                const res = await fetch(`/api/secured/comments/like/${commentId}`, { method: "PUT" });
-                const data = await res.json();
-
-                if (res.ok) {
-                    const countSpan = btn.querySelector(".like-count");
-                    let count = parseInt(countSpan.textContent);
-
-                    if (data.liked) {
-                        btn.classList.add("liked");
-                        countSpan.textContent = count + 1;
-                    } else {
-                        btn.classList.remove("liked");
-                        countSpan.textContent = count - 1;
-                    }
-
-                } else {
-                    if (res.status === 401) {
-                        window.location.href = "/authorization";
-                    }
-                    alert(data.error || "Ошибка при лайке комментария!");
-                }
-            };
-        });
+        if (showMoreBtn) {
+            showMoreBtn.style.display = loadedRootComments < data.rootCount ? "block" : "none";
+        }
     }
 }
 
-function renderComments(comments, container, bundleId) {
-    container.innerHTML = "";
-    comments.forEach(c => {
+async function renderComments(comments, container, bundleId) {
+    await Promise.all(comments.map(async (c) => {
         const div = document.createElement("div");
         div.className = "comment";
         const edited = c.edited ? "ред." : "";
@@ -87,13 +79,45 @@ function renderComments(comments, container, bundleId) {
 
         container.appendChild(div);
 
-        if (c.replies && c.replies.length > 0) {
-            const repliesDiv = document.createElement("div");
-            repliesDiv.className = "replies";
-            renderComments(c.replies, repliesDiv, bundleId);
-            div.appendChild(repliesDiv);
+        if (c.repliesCount > 0) {
+            await renderReplies(c, div, bundleId)
         }
-    });
+    }));
+}
+
+async function renderReplies(comment, container, bundleId) {
+    const repliesDiv = document.createElement("div");
+    repliesDiv.className = "replies";
+    container.appendChild(repliesDiv);
+
+    let loadedReplies = 0;
+    const limit = replyCommentsLimit;
+    const totalReplies = comment.repliesCount;
+
+    const showMoreBtn = document.createElement("button");
+    showMoreBtn.className = "show-more-replies";
+
+    async function loadMoreReplies() {
+        if (repliesDiv.contains(showMoreBtn)) {
+            showMoreBtn.remove();
+        }
+
+        const res = await fetch(`/api/public/comments/${comment.id}/replies?page=${Math.floor(loadedReplies/limit)}&limit=${limit}&sort=${commentsSortBy}`);
+        if (!res.ok) return;
+        const data = await res.json();
+
+        await renderComments(data, repliesDiv, bundleId);
+        loadedReplies += data.length;
+
+        if (loadedReplies < totalReplies) {
+            showMoreBtn.textContent = `Показать ещё (${totalReplies - loadedReplies})`;
+            repliesDiv.appendChild(showMoreBtn);
+        }
+    }
+
+    await loadMoreReplies();
+
+    showMoreBtn.addEventListener("click", loadMoreReplies);
 }
 
 function setupCommentActions(commentDiv, bundleId) {
@@ -115,6 +139,51 @@ function setupCommentActions(commentDiv, bundleId) {
             text: decodeURIComponent(btn.dataset.text),
             submitText: "Сохранить"
         });
+    });
+
+    commentDiv.querySelectorAll(".delete-comment").forEach(btn => {
+        btn.onclick = async () => {
+            if (!confirm("Удалить комментарий?")) return;
+
+            const commentId = btn.dataset.id;
+            const res = await fetch(`/api/secured/comments/delete/${commentId}`, { method: "DELETE" });
+
+            if (res.ok) {
+                loadComments(bundleId, true);
+            } else {
+                if (res.status === 401) {
+                    window.location.href = "/authorization";
+                }
+                alert((await res.json()).error);
+            }
+        };
+    });
+
+    commentDiv.querySelectorAll(".like-comment").forEach(btn => {
+        btn.onclick = async () => {
+            const commentId = btn.dataset.id;
+            const res = await fetch(`/api/secured/comments/like/${commentId}`, { method: "PUT" });
+            const data = await res.json();
+
+            if (res.ok) {
+                const countSpan = btn.querySelector(".like-count");
+                let count = parseInt(countSpan.textContent);
+
+                if (data.liked) {
+                    btn.classList.add("liked");
+                    countSpan.textContent = count + 1;
+                } else {
+                    btn.classList.remove("liked");
+                    countSpan.textContent = count - 1;
+                }
+
+            } else {
+                if (res.status === 401) {
+                    window.location.href = "/authorization";
+                }
+                alert(data.error || "Ошибка при лайке комментария!");
+            }
+        };
     });
 }
 
@@ -160,7 +229,7 @@ function openInlineForm(commentDiv, bundleId, { mode, parentId, commentId, place
         });
 
         if (res.ok) {
-            loadComments(bundleId);
+            loadComments(bundleId, true);
         } else {
             if (res.status === 401) {
                 window.location.href = "/authorization";
@@ -188,13 +257,16 @@ document.getElementById("comment-submit").addEventListener("click", async () => 
 
     if (res.ok) {
         document.getElementById("comment-input").value = "";
-        loadComments(bundleId);
+        loadComments(bundleId, true);
     } else {
         if (res.status === 401) {
             window.location.href = "/authorization";
         }
         alert(data.error || "Ошибка при добавлении комментария");
     }
-})
+});
 
-loadComments(window.location.pathname.split("/").pop());
+document.getElementById("sort-comments").addEventListener("change", () => loadComments(window.location.pathname.split("/").pop(), true));
+document.getElementById("max-elem-page").addEventListener("change", () => loadComments(window.location.pathname.split("/").pop(), true));
+
+loadComments(window.location.pathname.split("/").pop(), true);

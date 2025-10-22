@@ -3,8 +3,6 @@ package com.usachevsergey.AssetBundleServer.database.dto;
 import lombok.Data;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
 
 @Data
 public class CommentDTO {
@@ -17,5 +15,5 @@ public class CommentDTO {
     private boolean isBundleAuthor;
     private int likes;
     private boolean likedByUser;
-    private List<CommentDTO> replies = new ArrayList<>();
+    private Long repliesCount;
 }

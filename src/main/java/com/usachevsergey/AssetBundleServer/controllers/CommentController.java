@@ -1,7 +1,6 @@
 package com.usachevsergey.AssetBundleServer.controllers;
 
 import com.usachevsergey.AssetBundleServer.annotations.EmailVerifiedOnly;
-import com.usachevsergey.AssetBundleServer.database.dto.CommentDTO;
 import com.usachevsergey.AssetBundleServer.database.services.AssetBundleService;
 import com.usachevsergey.AssetBundleServer.database.services.CommentService;
 import com.usachevsergey.AssetBundleServer.database.services.UserService;
@@ -15,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -49,14 +47,34 @@ public class CommentController {
 
     @GetMapping("/api/public/bundles/{bundleId}/comments")
     public ResponseEntity<?> getComments(@AuthenticationPrincipal UserDetailsImpl userDetails,
-                                         @PathVariable Long bundleId) {
+                                         @PathVariable Long bundleId,
+                                         @RequestParam(defaultValue = "0") int page,
+                                         @RequestParam(defaultValue = "10") int limit,
+                                         @RequestParam(defaultValue = "date_asc") String sort) {
         User currentUser = null;
 
         if (userDetails != null) {
             currentUser = userService.getUser(userDetails.getUsername());
         }
 
-        return ResponseEntity.ok(commentService.getComments(assetBundleService.getBundle(bundleId), currentUser));
+        return ResponseEntity.ok(commentService.getComments(assetBundleService.getBundle(bundleId), currentUser,
+                page, limit, sort));
+    }
+
+    @GetMapping("/api/public/comments/{commentId}/replies")
+    public ResponseEntity<?> getReplies(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                        @PathVariable Long commentId,
+                                        @RequestParam(defaultValue = "0") int page,
+                                        @RequestParam(defaultValue = "5") int limit,
+                                        @RequestParam(defaultValue = "date_asc") String sort) {
+        User currentUser = null;
+
+        if (userDetails != null) {
+            currentUser = userService.getUser(userDetails.getUsername());
+        }
+
+        return ResponseEntity.ok(commentService.getReplies(commentService.getCommentById(commentId), currentUser,
+                page, limit, sort));
     }
 
     @EmailVerifiedOnly

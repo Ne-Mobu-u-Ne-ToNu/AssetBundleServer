@@ -1,12 +1,16 @@
 package com.usachevsergey.AssetBundleServer.database.services;
 
 import com.usachevsergey.AssetBundleServer.database.dto.CommentDTO;
+import com.usachevsergey.AssetBundleServer.database.enumerations.SortOption;
 import com.usachevsergey.AssetBundleServer.database.repositories.CommentRepository;
 import com.usachevsergey.AssetBundleServer.database.tables.AssetBundleInfo;
 import com.usachevsergey.AssetBundleServer.database.tables.Comment;
 import com.usachevsergey.AssetBundleServer.database.tables.User;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
@@ -34,20 +38,73 @@ public class CommentService {
     }
 
     @Transactional
-    public Map<?,?> getComments(AssetBundleInfo bundle, User currentUser) {
-        List<Comment> rootComments = commentRepository.findByBundleAndParentCommentIsNullOrderByCreatedAtAsc(bundle);
+    public Map<?,?> getComments(AssetBundleInfo bundle, User currentUser,
+                                int page, int limit, String sort) {
 
-        List<CommentDTO> allComments = rootComments.stream()
-                .map(c -> mapToDto(c, bundle, currentUser))
+        Page<Comment> rootComments;
+        SortOption sortOption = SortOption.getFromString(sort);
+
+        switch (sortOption) {
+            case DATE_DESC -> {
+                rootComments = commentRepository.findByBundleAndParentCommentIsNull(bundle,
+                        PageRequest.of(page, limit, Sort.by("createdAt").descending()));
+            }
+            case POPULARITY_ASC -> {
+                rootComments = commentRepository.findByBundleAndParentCommentIsNullOrderByLikesAsc(bundle,
+                        PageRequest.of(page, limit));
+            }
+            case POPULARITY_DESC -> {
+                rootComments = commentRepository.findByBundleAndParentCommentIsNullOrderByLikesDesc(bundle,
+                        PageRequest.of(page, limit));
+            }
+            default -> {
+                rootComments = commentRepository.findByBundleAndParentCommentIsNull(bundle,
+                        PageRequest.of(page, limit, Sort.by("createdAt").ascending()));
+            }
+        }
+
+        List<CommentDTO> result = rootComments.stream()
+                .map(c -> mapToDto(c, currentUser))
                 .toList();
 
         Long count = commentRepository.countByBundle(bundle);
 
-        return Map.of("comments", allComments,
-                "count", count);
+        return Map.of("comments", result,
+                "count", count,
+                "rootCount", commentRepository.countByBundleAndParentCommentIsNull(bundle),
+                "page", page,
+                "limit", limit);
     }
 
-    public CommentDTO mapToDto(Comment comment, AssetBundleInfo bundle, User currentUser) {
+    @Transactional
+    public List<CommentDTO> getReplies(Comment comment, User currentUser,
+                                       int page, int limit, String sort) {
+        Page<Comment> replies;
+        SortOption sortOption = SortOption.getFromString(sort);
+
+        switch (sortOption) {
+            case DATE_DESC -> {
+                replies = commentRepository.findByParentComment(comment,
+                        PageRequest.of(page, limit, Sort.by("createdAt").descending()));
+            }
+            case POPULARITY_ASC -> {
+                replies = commentRepository.findByParentCommentOrderByLikesAsc(comment,
+                        PageRequest.of(page, limit));
+            }
+            case POPULARITY_DESC -> {
+                replies = commentRepository.findByParentCommentOrderByLikesDesc(comment,
+                        PageRequest.of(page, limit));
+            }
+            default -> {
+                replies = commentRepository.findByParentComment(comment,
+                        PageRequest.of(page, limit, Sort.by("createdAt").ascending()));
+            }
+        }
+
+        return replies.stream().map(c -> mapToDto(c, currentUser)).toList();
+    }
+
+    public CommentDTO mapToDto(Comment comment, User currentUser) {
         CommentDTO result = new CommentDTO();
         result.setId(comment.getId());
         result.setText(comment.getText());
@@ -55,14 +112,10 @@ public class CommentService {
         result.setCreatedAt(comment.getCreatedAt());
         result.setEdited(comment.isEdited());
         result.setAuthor(comment.getAuthor().equals(currentUser));
-        result.setBundleAuthor(comment.getAuthor().getId().equals(bundle.getUploadedBy().getId()));
+        result.setBundleAuthor(comment.getAuthor().getId().equals(comment.getBundle().getUploadedBy().getId()));
         result.setLikes(comment.getLikedBy().size());
         result.setLikedByUser(comment.getLikedBy().contains(currentUser));
-
-        List<Comment> replies = commentRepository.findByParentCommentOrderByCreatedAtAsc(comment);
-        for (Comment reply : replies) {
-            result.getReplies().add(mapToDto(reply, bundle, currentUser));
-        }
+        result.setRepliesCount(commentRepository.countByParentComment(comment));
 
         return result;
     }
@@ -95,7 +148,7 @@ public class CommentService {
 
     @Transactional
     private void deleteReplies(Comment comment) {
-        List<Comment> replies = commentRepository.findByParentCommentOrderByCreatedAtAsc(comment);
+        List<Comment> replies = commentRepository.findByParentComment(comment);
         for (Comment reply: replies) {
             deleteReplies(reply);
             commentRepository.delete(reply);

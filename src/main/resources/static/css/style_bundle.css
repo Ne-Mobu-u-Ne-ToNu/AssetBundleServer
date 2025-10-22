@@ -316,3 +316,35 @@
     50% { transform: scale(1.4); }
     100% { transform: scale(1); }
 }
+
+.render-comment-params {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+#sort-comments, #max-elem-page {
+    margin-bottom: 1rem;
+    padding: 0.25rem;
+    font-size: 1rem;
+    align-items: center;
+    max-width: 200px;
+}
+
+#show-more-root, .comment .show-more-replies {
+    background-color: #f1f1f1;
+    color: #007bff;
+    border: none;
+    padding: 6px 12px;
+    margin: 4px 0;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s, color 0.2s;
+}
+
+#show-more-root:hover, .comment .show-more-replies:hover {
+    background-color: #007bff;
+    color: white;
+    text-decoration: unset;
+}
