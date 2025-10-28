@@ -11,6 +11,12 @@ function showBundles(bundles) {
     const card = document.createElement("div");
     card.className = "bundle-card";
 
+    const price = document.createElement("p");
+    price.className = "bundle-price";
+    price.textContent = bundle.price
+    ? new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(bundle.price)
+    : "Бесплатно";
+
     const cartButton = document.createElement("button");
     cartButton.className = "btn-add-to-cart";
     cartButton.dataset.bundleId = bundle.id;
@@ -18,6 +24,7 @@ function showBundles(bundles) {
 
     const buyWrapper = document.createElement("div");
     buyWrapper.className = "buy-wrapper";
+    buyWrapper.appendChild(price);
     buyWrapper.appendChild(cartButton);
 
 

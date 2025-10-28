@@ -135,6 +135,14 @@
   color: #888;
 }
 
+.bundle-price {
+  font-weight: bold;
+  font-size: 1.2em;
+  color: #2a9d8f;
+  margin: 10px 0;
+  display: none;
+}
+
 .btn-add-to-cart {
   background-color: #007bff;
   color: white;

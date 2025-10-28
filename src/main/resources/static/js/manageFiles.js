@@ -67,10 +67,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const name = document.getElementById('name').value.trim();
         const description = document.getElementById('description').value.trim();
+        const price = document.getElementById('price').value.trim();
         const bundleFile = bundleInput.files[0];
         const imageFiles = imageInput.files;
 
-        if (!name || !description || !bundleFile || imageFiles.length === 0) {
+        if (!name || !description || !price || !bundleFile || imageFiles.length === 0) {
             alert("Пожалуйста, заполните все поля и выберите файлы.");
             return;
         }
@@ -78,6 +79,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const formData = new FormData();
         formData.append("name", name);
         formData.append("description", description);
+        formData.append("price", price);
         formData.append("bundleFile", bundleFile);
         for (let i = 0; i < imageFiles.length; i++) {
             formData.append("images", imageFiles[i]);

@@ -5,6 +5,7 @@ import lombok.Data;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -26,6 +27,8 @@ public class AssetBundleInfo {
     @JoinColumn(name = "uploaded_by")
     @OnDelete(action = OnDeleteAction.CASCADE)
     private User uploadedBy;
+    @Column(nullable = false, precision = 10, scale = 2)
+    private BigDecimal price;
 
     @PrePersist
     protected void onCreate() {

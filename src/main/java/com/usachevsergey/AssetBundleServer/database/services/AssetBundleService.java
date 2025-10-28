@@ -38,6 +38,7 @@ public class AssetBundleService {
         assetBundle.setName(request.getName());
         assetBundle.setDescription(request.getDescription());
         assetBundle.setFilename(request.getFilename(user.getId()));
+        assetBundle.setPrice(request.getPrice());
         assetBundleInfoRepository.save(assetBundle);
 
         saveImages(assetBundle, request.getImagesNames(user.getId()));
@@ -97,6 +98,7 @@ public class AssetBundleService {
                 info.getFilename(),
                 info.getUploadedAt(),
                 info.getUploadedBy(),
+                info.getPrice(),
                 paths
         );
     }

@@ -49,6 +49,11 @@
     text-decoration: underline;
 }
 
+.card-item-right {
+    display: flex;
+    align-items: center;
+}
+
 .card-item-right #edit-btn, #download-btn {
     background-color: #007bff;
     color: white;
@@ -100,4 +105,20 @@
 
 #checkout-btn:hover {
     background-color: #0056b3;
+}
+
+.bundle-price {
+    font-weight: bold;
+    font-size: 1.2em;
+    color: #2a9d8f;
+    margin-right: 20px;
+}
+
+#total-price-container {
+    align-self: flex-end;
+    margin-top: 1rem;
+    font-weight: bold;
+    font-size: 1.3rem;
+    text-align: right;
+    display: none;
 }

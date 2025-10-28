@@ -4,6 +4,7 @@ import lombok.*;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -16,6 +17,7 @@ public class AddAssetBundleRequest {
     @Getter(AccessLevel.NONE)
     private String filename;
     private Date uploadedAt;
+    private BigDecimal price;
     @Setter(AccessLevel.NONE)
     @Getter(AccessLevel.NONE)
     private List<String> imagesNames;

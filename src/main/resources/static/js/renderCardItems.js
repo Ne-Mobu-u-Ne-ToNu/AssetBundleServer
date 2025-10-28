@@ -63,6 +63,16 @@ function renderCardItems(bundlesInCard, mode, role) {
             right.appendChild(editBtn);
         }
 
+        if (mode === "cart") {
+            const price = document.createElement("p");
+            price.className = "bundle-price";
+            price.textContent = bundle.price
+            ? new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(bundle.price)
+            : "Бесплатно";
+
+            right.appendChild(price);
+        }
+
         if (role === "DEVELOPER" || mode === "cart") {
             const removeBtn = document.createElement("button");
             removeBtn.id = "delete-btn";

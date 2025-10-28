@@ -4,6 +4,7 @@ import com.usachevsergey.AssetBundleServer.database.tables.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 
+import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -16,5 +17,6 @@ public class AssetBundleDTO {
     private String filename;
     private Date uploadedAt;
     private User uploadedBy;
+    private BigDecimal price;
     private List<String> imagePaths;
 }

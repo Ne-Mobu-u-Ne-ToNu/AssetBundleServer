@@ -5,6 +5,7 @@ async function removeFromCart(bundleId) {
         const data = await getCart();
         if (data && data.cartItems) {
             renderCardItems(data.cartItems, "cart", null);
+            updateTotalPrice(data.cartItems);
         }
     }
 }
@@ -35,10 +36,30 @@ async function purchaseBundles(bundlesInCart) {
     }
 }
 
+function updateTotalPrice(bundlesInCard) {
+    const totalPriceContainer = document.getElementById("total-price-container");
+
+    if (bundlesInCard.length === 0) {
+        totalPriceContainer.style.display = "none"
+        return;
+    }
+
+    const totalPrice = document.getElementById("total-price");
+    let total = 0;
+
+    bundlesInCard.forEach(bundle => {
+        total += bundle.price;
+    });
+
+    totalPrice.textContent = new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(total);
+    totalPriceContainer.style.display = "block";
+}
+
 window.addEventListener('load', async () => {
     const user = await checkAuth();
     const data = await getCart();
     if (data && data.cartItems) {
         renderCardItems(data.cartItems, "cart", user.role);
+        updateTotalPrice(data.cartItems);
     }
 });

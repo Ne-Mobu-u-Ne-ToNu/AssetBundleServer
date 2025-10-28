@@ -4,11 +4,13 @@ async function createCartButtonsLogic() {
    if (user === null || user.role !== "DEVELOPER") {
       const bought = await getMyBundles();
       document.querySelectorAll('.btn-add-to-cart').forEach(btn => {
+         const price = btn.closest('.bundle-card, .bundle-details')?.querySelector('.bundle-price');
          btn.style.display = "block";
          const bundleId = btn.dataset.bundleId;
          const myBundles = bought?.myBundles || [];
 
          if (!myBundles.some(b => b.id === parseInt(bundleId))) {
+            price.style.display = "block";
             fetch(`/api/secured/cart/check/${bundleId}`)
                .then(res => res.json().then(data => {
                if(res.ok) {

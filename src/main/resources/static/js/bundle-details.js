@@ -16,6 +16,9 @@ fetch(`/api/public/bundle/${bundleId}`)
         document.getElementById('uploaded-by').textContent = 'Автор: ' + data.uploadedBy.username;
         document.getElementById('bundle-uploaded-at').textContent =
         'Загружено: ' + new Date(data.uploadedAt).toLocaleDateString();
+        document.getElementById('bundle-price').textContent = data.price
+        ? new Intl.NumberFormat('ru-RU', { style: 'currency', currency: 'RUB' }).format(data.price)
+        : "Бесплатно";
         document.getElementById('btn-add-to-cart').dataset.bundleId = bundleId;
         createCartButtonsLogic();
 
