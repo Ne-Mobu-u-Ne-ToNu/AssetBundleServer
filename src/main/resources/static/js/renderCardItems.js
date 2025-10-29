@@ -81,7 +81,7 @@ function renderCardItems(bundlesInCard, mode, role) {
                 if (mode === "cart") {
                     removeFromCart(bundle.id);
                 } else if (role === "DEVELOPER") {
-                    // Удаление с сервера
+                    deleteBundle(bundle.id);
                 }
             });
             right.appendChild(removeBtn);

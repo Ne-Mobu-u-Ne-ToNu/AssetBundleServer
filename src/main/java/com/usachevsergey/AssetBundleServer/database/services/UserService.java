@@ -1,8 +1,11 @@
 package com.usachevsergey.AssetBundleServer.database.services;
 
+import com.usachevsergey.AssetBundleServer.database.enumerations.Role;
 import com.usachevsergey.AssetBundleServer.database.enumerations.TokenType;
+import com.usachevsergey.AssetBundleServer.database.repositories.AssetBundleInfoRepository;
 import com.usachevsergey.AssetBundleServer.database.repositories.UserRepository;
 import com.usachevsergey.AssetBundleServer.database.repositories.VerificationTokenRepository;
+import com.usachevsergey.AssetBundleServer.database.tables.AssetBundleInfo;
 import com.usachevsergey.AssetBundleServer.database.tables.User;
 import com.usachevsergey.AssetBundleServer.database.tables.VerificationToken;
 import com.usachevsergey.AssetBundleServer.requests.SignupRequest;
@@ -28,6 +31,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -45,6 +49,11 @@ public class UserService implements UserDetailsService {
     private JwtCore jwtCore;
     @Autowired
     JwtCookieManager jwtCookieManager;
+    @Autowired
+    private AssetBundleService assetBundleService;
+    @Autowired
+    private AssetBundleInfoRepository assetBundleInfoRepository;
+
     @Value("${server.app.verTokenLifeHours}")
     private int verifyTokenLifetime;
     @Value("${server.app.verifyEmailLink}")
@@ -198,8 +207,11 @@ public class UserService implements UserDetailsService {
     }
 
     @Transactional
-    public void deleteAccount(String username, HttpServletResponse response) {
-        User user = getUser(username);
+    public void deleteAccount(User user, Role role, HttpServletResponse response) {
+        if (role.equals(Role.DEVELOPER)) {
+            List<AssetBundleInfo> bundles = assetBundleInfoRepository.findByUploadedBy(user);
+            assetBundleService.deleteAllBundles(bundles);
+        }
 
         userRepository.delete(user);
         jwtCookieManager.clearToken(response);

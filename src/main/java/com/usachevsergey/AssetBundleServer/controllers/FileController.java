@@ -2,7 +2,6 @@ package com.usachevsergey.AssetBundleServer.controllers;
 
 import com.usachevsergey.AssetBundleServer.annotations.EmailVerifiedOnly;
 import com.usachevsergey.AssetBundleServer.database.enumerations.Role;
-import com.usachevsergey.AssetBundleServer.database.repositories.CartItemRepository;
 import com.usachevsergey.AssetBundleServer.database.services.AssetBundleService;
 import com.usachevsergey.AssetBundleServer.database.services.CartItemService;
 import com.usachevsergey.AssetBundleServer.database.services.UserService;
@@ -25,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardCopyOption;
 import java.util.List;
 import java.util.Map;
 
@@ -137,5 +135,22 @@ public class FileController {
         cartItemService.removeFromCart(user, assetBundles);
 
         return ResponseEntity.ok(Map.of("message", "Бандлы успешно куплены!"));
+    }
+
+    @EmailVerifiedOnly
+    @PreAuthorize("hasAuthority('DEVELOPER')")
+    @DeleteMapping("/api/secured/delete/{id}")
+    public ResponseEntity<?> deleteBundle(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                          @PathVariable Long id) {
+        User user = userService.getUser(userDetails.getUsername());
+        AssetBundleInfo bundle = assetBundleService.getBundle(id);
+
+        if (!user.equals(bundle.getUploadedBy())) {
+            throw new IllegalStateException("У вас нет прав для удаления этого бандла!");
+        }
+
+        assetBundleService.deleteBundle(bundle);
+
+        return ResponseEntity.ok(Map.of("message", "Бандл успешно удален!"));
     }
 }

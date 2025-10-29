@@ -11,7 +11,9 @@ import com.usachevsergey.AssetBundleServer.database.tables.User;
 import com.usachevsergey.AssetBundleServer.database.tables.UserBundle;
 import com.usachevsergey.AssetBundleServer.requests.AddAssetBundleRequest;
 import com.usachevsergey.AssetBundleServer.security.authorization.UserInputValidator;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -19,6 +21,11 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Map;
 
@@ -31,6 +38,11 @@ public class AssetBundleService {
     private AssetBundleImageRepository assetBundleImageRepository;
     @Autowired
     private UserBundleRepository userBundleRepository;
+
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+    @Value("${file.thumbnails-dir}")
+    private String thumbnailsDir;
 
     public void uploadAssetBundle(AddAssetBundleRequest request, User user) {
         AssetBundleInfo assetBundle = new AssetBundleInfo();
@@ -111,6 +123,34 @@ public class AssetBundleService {
 
     public List<AssetBundleDTO> getBundlesByUser(User user) {
         return createDTOFromInfo(userBundleRepository.findBundlesByUser(user));
+    }
+
+    @Transactional
+    public void deleteBundle(AssetBundleInfo bundle) {
+        List<AssetBundleImage> images = assetBundleImageRepository.findImagesByAssetBundle(bundle).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND, "Изображения не найдены!"));
+
+        try {
+            Path filePath;
+            for (AssetBundleImage image : images) {
+                filePath = Paths.get(thumbnailsDir, image.getPath());
+                Files.deleteIfExists(filePath);
+                assetBundleImageRepository.delete(image);
+            }
+
+            filePath = Paths.get(uploadDir, bundle.getFilename());
+            Files.deleteIfExists(filePath);
+            assetBundleInfoRepository.delete(bundle);
+        } catch (IOException e) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Не удалось удалить бандл: " + bundle.getName());
+        }
+    }
+
+    @Transactional
+    public void deleteAllBundles(List<AssetBundleInfo> bundles) {
+        for (AssetBundleInfo bundle : bundles) {
+            deleteBundle(bundle);
+        }
     }
 
     private List<AssetBundleDTO> createDTOFromInfo(List<AssetBundleInfo> info) {

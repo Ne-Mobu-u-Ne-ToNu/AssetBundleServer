@@ -1,5 +1,6 @@
 package com.usachevsergey.AssetBundleServer.controllers;
 
+import com.usachevsergey.AssetBundleServer.database.enumerations.Role;
 import com.usachevsergey.AssetBundleServer.requests.UpdateUserRequest;
 import com.usachevsergey.AssetBundleServer.security.authorization.UserDetailsImpl;
 import com.usachevsergey.AssetBundleServer.database.services.UserService;
@@ -7,6 +8,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -82,7 +84,13 @@ public class MainUserController {
         if (userDetails == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", unauthorizedMessage));
         }
-        userService.deleteAccount(userDetails.getUsername(), response);
+
+        Role role = Role.valueOf(userDetails.getAuthorities().stream()
+                .findFirst()
+                .map(GrantedAuthority::getAuthority)
+                .orElse(null));
+
+        userService.deleteAccount(userService.getUser(userDetails.getUsername()), role, response);
 
         return ResponseEntity.ok(Map.of("message", "Аккаун удален успешно!"));
     }

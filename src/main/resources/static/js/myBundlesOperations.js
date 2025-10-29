@@ -8,3 +8,15 @@ async function getMyBundles() {
         return null;
     }
 }
+
+async function deleteBundle(bundleId) {
+    const response = await fetch(`/api/secured/delete/${bundleId}`, { method: 'DELETE' });
+    const data = await response.json();
+
+    if (response.ok) {
+        alert(data.message);
+        window.location.reload();
+    } else {
+        alert(data.error);
+    }
+}
