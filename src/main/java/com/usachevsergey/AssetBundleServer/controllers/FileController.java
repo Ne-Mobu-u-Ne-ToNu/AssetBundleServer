@@ -75,9 +75,10 @@ public class FileController {
     public ResponseEntity<?> searchAssetBundles(
             @RequestParam(required = false, defaultValue = "") String name,
             @RequestParam(defaultValue = "name") String sort,
+            @RequestParam List<Long> categoryIds,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "12") int size) {
-        return ResponseEntity.ok(assetBundleService.getBundlesBySearch(name, sort, page, size));
+        return ResponseEntity.ok(assetBundleService.getBundlesBySearch(name, sort, categoryIds, page, size));
     }
 
     @GetMapping("/api/public/bundle/{id}")

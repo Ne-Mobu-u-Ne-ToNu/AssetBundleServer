@@ -4,6 +4,7 @@ import com.usachevsergey.AssetBundleServer.database.dto.AssetBundleDTO;
 import com.usachevsergey.AssetBundleServer.database.enumerations.SortOption;
 import com.usachevsergey.AssetBundleServer.database.repositories.AssetBundleImageRepository;
 import com.usachevsergey.AssetBundleServer.database.repositories.AssetBundleInfoRepository;
+import com.usachevsergey.AssetBundleServer.database.repositories.BundleCategoryRepository;
 import com.usachevsergey.AssetBundleServer.database.repositories.UserBundleRepository;
 import com.usachevsergey.AssetBundleServer.database.tables.AssetBundleImage;
 import com.usachevsergey.AssetBundleServer.database.tables.AssetBundleInfo;
@@ -38,6 +39,10 @@ public class AssetBundleService {
     private AssetBundleImageRepository assetBundleImageRepository;
     @Autowired
     private UserBundleRepository userBundleRepository;
+    @Autowired
+    private CategoryService categoryService;
+    @Autowired
+    private BundleCategoryRepository bundleCategoryRepository;
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -53,10 +58,12 @@ public class AssetBundleService {
         assetBundle.setPrice(request.getPrice());
         assetBundleInfoRepository.save(assetBundle);
 
+        categoryService.saveBundleCategories(request.getCategoryIds(), assetBundle);
+
         saveImages(assetBundle, request.getImagesNames(user.getId()));
     }
 
-    public Map<String, ?> getBundlesBySearch(String name, String sort,
+    public Map<String, ?> getBundlesBySearch(String name, String sort, List<Long> categoryIds,
                                                    int page, int size) {
         Page<AssetBundleInfo> bundlesPage;
         Pageable pageable;
@@ -69,8 +76,8 @@ public class AssetBundleService {
             default -> throw new IllegalArgumentException("Ну удалось выполнить сортировку!");
         }
 
-        if (UserInputValidator.isNullOrEmpty(name)) {
-            bundlesPage = assetBundleInfoRepository.findAll(pageable);
+        if (categoryIds.size() > 0) {
+            bundlesPage = bundleCategoryRepository.findByNameAndCategoryIds(name, categoryIds, pageable);
         } else {
             bundlesPage = assetBundleInfoRepository.findByNameContainingIgnoreCase(name, pageable);
         }
@@ -111,7 +118,8 @@ public class AssetBundleService {
                 info.getUploadedAt(),
                 info.getUploadedBy(),
                 info.getPrice(),
-                paths
+                paths,
+                bundleCategoryRepository.findByAssetBundle(info)
         );
     }
 

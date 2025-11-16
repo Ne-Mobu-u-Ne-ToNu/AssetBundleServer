@@ -1,0 +1,109 @@
+.filter-card {
+    background: #fff;
+    padding: 12px;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    max-width: 320px;
+}
+
+#categories-tree {
+    max-height: 360px;
+    overflow: auto;
+    padding-right: 6px;
+}
+
+.category-node {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+}
+
+.category-children {
+    margin-left: 20px;
+    margin-top: 4px;
+}
+
+.category-label {
+    cursor: pointer;
+    user-select: none;
+}
+
+.filter-actions {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+}
+#clear-categories {
+    background: #007bff;
+    color: #fff;
+    border: none;
+    padding: 6px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+}
+#clear-categories:hover {
+    background: #0056b3;
+}
+
+.checkbox-wrapper {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    margin: 6px 0;
+    user-select: none;
+}
+
+.checkbox-wrapper input {
+    display: none;
+}
+
+.checkbox-wrapper .checkmark {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+    border: 2px solid #007bff;
+    display: inline-block;
+    background-color: white;
+    transition: background-color 0.2s, border-color 0.2s;
+    position: relative;
+}
+
+.checkbox-wrapper input:checked + .checkmark {
+    background-color: #007bff;
+}
+
+.checkbox-wrapper input:checked + .checkmark::after {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 0px;
+    width: 6px;
+    height: 12px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+}
+
+.checkbox-wrapper:hover .checkmark {
+    border-color: #0056b3;
+}
+
+.checkbox-wrapper.indeterminate .checkmark {
+    background: #ffcc00;
+    border-color: #caa000;
+    position: relative;
+}
+
+.checkbox-wrapper.indeterminate .checkmark::after {
+    content: "";
+    position: absolute;
+    left: 4px;
+    top: 8px;
+    width: 12px;
+    height: 2px;
+    background: #000;
+    border-radius: 1px;
+}

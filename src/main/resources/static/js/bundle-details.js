@@ -22,6 +22,16 @@ fetch(`/api/public/bundle/${bundleId}`)
         document.getElementById('btn-add-to-cart').dataset.bundleId = bundleId;
         createCartButtonsLogic();
 
+        const catBox = document.getElementById("bundle-categories");
+
+        if (data.categories && data.categories.length > 0) {
+            catBox.innerHTML = data.categories
+                .map(cat => `<span class="bundle-category">${cat.name}</span>`)
+                .join("");
+        } else {
+            catBox.innerHTML = `<span class="no-category">Без категории</span>`;
+        }
+
         const mainImage = document.getElementById('main-image');
         const thumbnailList = document.getElementById('thumbnail-list');
         const modal = document.getElementById('image-modal');

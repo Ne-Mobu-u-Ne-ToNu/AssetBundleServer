@@ -1,5 +1,6 @@
 package com.usachevsergey.AssetBundleServer.database.dto;
 
+import com.usachevsergey.AssetBundleServer.database.tables.Category;
 import com.usachevsergey.AssetBundleServer.database.tables.User;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -19,4 +20,5 @@ public class AssetBundleDTO {
     private User uploadedBy;
     private BigDecimal price;
     private List<String> imagePaths;
+    private List<Category> categories;
 }

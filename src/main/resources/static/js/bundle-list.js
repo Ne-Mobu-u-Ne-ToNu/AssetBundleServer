@@ -3,6 +3,28 @@ const bundle_search = document.getElementById("bundle-search");
 const sortSelect = document.getElementById("sort-select");
 const max_elem_page = document.getElementById("max-elem-page");
 
+const categoriesTreeEl = document.getElementById('categories-tree');
+
+window.addEventListener('load', async () => {
+  await fetchCategoriesAndRender(categoriesTreeEl);
+  attachCategoryCheckboxListeners();
+});
+
+let debounceTimer;
+
+function attachCategoryCheckboxListeners() {
+  const checkboxes = document.querySelectorAll('.cat-checkbox');
+  checkboxes.forEach(cb => {
+    cb.addEventListener('change', () => {
+      clearTimeout(debounceTimer);
+
+      debounceTimer = setTimeout(() => {
+        fetchBundles();
+      }, 500);
+    });
+  });
+}
+
 function showBundles(bundles) {
   const container = document.getElementById("bundle-list");
   container.innerHTML = "";
@@ -34,6 +56,17 @@ function showBundles(bundles) {
 
     const description = document.createElement("p");
     description.textContent = bundle.description;
+
+    const categoriesDiv = document.createElement("div");
+    categoriesDiv.className = "bundle-categories";
+    if (bundle.categories && bundle.categories.length > 0) {
+      bundle.categories.forEach(cat => {
+        const span = document.createElement("span");
+        span.className = "category-badge";
+        span.textContent = cat.name;
+        categoriesDiv.appendChild(span);
+      });
+    }
 
     const wrapper = document.createElement("div");
     wrapper.className = "image-wrapper";
@@ -87,6 +120,7 @@ function showBundles(bundles) {
 
     card.appendChild(title);
     card.appendChild(description);
+    card.appendChild(categoriesDiv);
     card.appendChild(wrapper);
     card.appendChild(indicators);
     card.appendChild(buyWrapper);
@@ -105,7 +139,8 @@ function fetchBundles() {
     page: currentPage,
     size: parseInt(max_elem_page.value),
     sort: sortSelect.value,
-    name: query
+    name: query,
+    categoryIds: getSelectedCategoryIds()
   });
 
   fetch(`/api/public/search?${params}`)
@@ -118,7 +153,6 @@ function fetchBundles() {
 
 fetchBundles();
 
-let debounceTimer;
 bundle_search.addEventListener("input", function () {
   clearTimeout(debounceTimer);
 

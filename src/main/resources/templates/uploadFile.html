@@ -19,6 +19,18 @@
                     placeholder="Введите цену"
                     required
             />
+
+            <br>
+            <br>
+
+            <div id="categories-filter" class="filter-card">
+                <h4>Категории</h4>
+                <div id="categories-tree">Загрузка...</div>
+                <div class="filter-actions">
+                    <button id="clear-categories">Сбросить</button>
+                </div>
+            </div>
+
             <br>
             <br>
 
@@ -49,9 +61,11 @@
 <!-- extraStyles -->
 <th:block th:fragment="extraStyles">
     <link rel="stylesheet" href="/css/style_uploadFiles.css">
+    <link rel="stylesheet" href="/css/style_categories.css">
 </th:block>
 
 <!-- extraScripts -->
 <th:block th:fragment="extraScripts">
+    <script src="/js/fetchCategoriesAndRender.js"></script>
     <script src="/js/manageFiles.js"></script>
 </th:block>

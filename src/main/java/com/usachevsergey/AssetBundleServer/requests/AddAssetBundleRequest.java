@@ -1,5 +1,6 @@
 package com.usachevsergey.AssetBundleServer.requests;
 
+import com.usachevsergey.AssetBundleServer.database.tables.Category;
 import lombok.*;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
@@ -23,6 +24,7 @@ public class AddAssetBundleRequest {
     private List<String> imagesNames;
     private MultipartFile bundleFile;
     private List<MultipartFile> images;
+    private List<Long> categoryIds;
 
     public String getFilename(Long userId) {
         if (bundleFile != null) {

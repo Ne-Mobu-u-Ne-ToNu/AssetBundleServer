@@ -8,6 +8,14 @@
               class="bundle-search"
               placeholder="Поиск по названию..."
       >
+      <div id="categories-filter" class="filter-card">
+        <h4>Категории</h4>
+        <div id="categories-tree">Загрузка...</div>
+        <div class="filter-actions">
+          <button id="clear-categories">Сбросить</button>
+        </div>
+      </div>
+
       <div id="render-on-page">
         <div class="render-control">
           <label for="sort-select">Сортировка:</label>
@@ -37,11 +45,13 @@
 <!-- extraStyles -->
 <th:block th:fragment="extraStyles">
   <link rel="stylesheet" href="/css/style_store.css">
+  <link rel="stylesheet" href="/css/style_categories.css">
 </th:block>
 
 <!-- extraScripts -->
 <th:block th:fragment="extraScripts">
   <script src="/js/myBundlesOperations.js"></script>
   <script src="/js/cart-button.js"></script>
+  <script src="/js/fetchCategoriesAndRender.js"></script>
   <script src="/js/bundle-list.js"></script>
 </th:block>
