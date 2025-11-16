@@ -5,7 +5,9 @@ public enum SortOption {
     DATE_ASC,
     DATE_DESC,
     POPULARITY_ASC,
-    POPULARITY_DESC;
+    POPULARITY_DESC,
+    PRICE_ASC,
+    PRICE_DESC;
 
     public static SortOption getFromString(String option) {
         try {

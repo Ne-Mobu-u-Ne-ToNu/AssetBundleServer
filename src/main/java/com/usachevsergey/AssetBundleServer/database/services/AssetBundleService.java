@@ -73,6 +73,8 @@ public class AssetBundleService {
             case NAME -> pageable = PageRequest.of(page, size, Sort.by("name").ascending());
             case DATE_ASC -> pageable = PageRequest.of(page, size, Sort.by("uploadedAt").ascending());
             case DATE_DESC -> pageable = PageRequest.of(page, size, Sort.by("uploadedAt").descending());
+            case PRICE_ASC -> pageable = PageRequest.of(page, size, Sort.by("price").ascending());
+            case PRICE_DESC -> pageable = PageRequest.of(page, size, Sort.by("price").descending());
             default -> throw new IllegalArgumentException("Ну удалось выполнить сортировку!");
         }
 
