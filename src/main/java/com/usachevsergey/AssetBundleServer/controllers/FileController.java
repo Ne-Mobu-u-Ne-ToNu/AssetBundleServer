@@ -26,6 +26,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 public class FileController {
@@ -40,6 +41,15 @@ public class FileController {
     private UserService userService;
     @Autowired
     private CartItemService cartItemService;
+    private static final Set<String> IMAGE_CONTENT_TYPES = Set.of(
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+    );
+
+    private static final Set<String> BUNDLE_EXTENSIONS = Set.of(
+            "zip", "rar", "7z", "tar", "gz"
+    );
 
     @EmailVerifiedOnly
     @PreAuthorize("hasAuthority('DEVELOPER')")
@@ -53,10 +63,19 @@ public class FileController {
         User user = userService.getUser(userDetails.getUsername());
 
         try {
+            MultipartFile bundleFile = request.getBundleFile();
+            String bundleExt = StringUtils.getFilenameExtension(bundleFile.getOriginalFilename());
+            if (!BUNDLE_EXTENSIONS.contains(bundleExt.toLowerCase())) {
+                throw new IllegalArgumentException("Недопустимый формат бандла!");
+            }
+
             Path targetPath = Path.of(uploadDir, request.getFilename(user.getId())).toAbsolutePath();
-            Files.copy(request.getBundleFile().getInputStream(), targetPath);
+            Files.copy(bundleFile.getInputStream(), targetPath);
 
             for (MultipartFile current : request.getImages()) {
+                if (!IMAGE_CONTENT_TYPES.contains(current.getContentType())) {
+                    throw new IllegalArgumentException("Недопустимый формат изображения!");
+                }
                 targetPath = Path.of(thumbnailsDir, user.getId() + "_" + StringUtils.cleanPath(current.getOriginalFilename()))
                         .toAbsolutePath();
                 Files.copy(current.getInputStream(), targetPath);

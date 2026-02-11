@@ -36,8 +36,12 @@
 
             <!-- Drag & Drop для одного bundle файла -->
             <div id="bundle-drop-area" class="drop-area">
-                <p>Перетащите бандл сюда или нажмите для выбора</p>
-                <input type="file" id="bundleInput" class="fileElem" required>
+                <p>Перетащите бандл в форматах .zip,.rar,.7z,.tar,.gz сюда или нажмите для выбора</p>
+                <input type="file"
+                       id="bundleInput"
+                       class="fileElem"
+                        accept=".zip,.rar,.7z,.tar,.gz"
+                       required>
                 <label for="bundleInput" class="fileLabel">Выбрать файл</label>
             </div>
             <br>
@@ -46,8 +50,12 @@
 
             <!-- Drag & Drop для нескольких изображений -->
             <div id="image-drop-area" class="drop-area">
-                <p>Перетащите изображения сюда или нажмите для выбора</p>
-                <input type="file" id="imageInput" class="fileElem" multiple required>
+                <p>Перетащите изображения в форматах png, jpeg, webp сюда или нажмите для выбора</p>
+                <input type="file"
+                       id="imageInput"
+                       class="fileElem"
+                       accept="image/png,image/jpeg,image/webp"
+                       multiple required>
                 <label for="imageInput" class="fileLabel">Выбрать изображения</label>
             </div>
             <br>
