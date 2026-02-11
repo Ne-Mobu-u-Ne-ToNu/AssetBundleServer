@@ -2,6 +2,8 @@ package com.usachevsergey.AssetBundleServer.controllers;
 
 import com.usachevsergey.AssetBundleServer.annotations.EmailVerifiedOnly;
 import com.usachevsergey.AssetBundleServer.database.enumerations.Role;
+import com.usachevsergey.AssetBundleServer.database.repositories.AssetBundleInfoRepository;
+import com.usachevsergey.AssetBundleServer.database.repositories.UserBundleRepository;
 import com.usachevsergey.AssetBundleServer.database.services.AssetBundleService;
 import com.usachevsergey.AssetBundleServer.database.services.CartItemService;
 import com.usachevsergey.AssetBundleServer.database.services.UserService;
@@ -11,8 +13,11 @@ import com.usachevsergey.AssetBundleServer.requests.AddAssetBundleRequest;
 import com.usachevsergey.AssetBundleServer.security.authorization.UserDetailsImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.GrantedAuthority;
@@ -38,9 +43,13 @@ public class FileController {
     @Autowired
     private AssetBundleService assetBundleService;
     @Autowired
+    private AssetBundleInfoRepository assetBundleInfoRepository;
+    @Autowired
     private UserService userService;
     @Autowired
     private CartItemService cartItemService;
+    @Autowired
+    private UserBundleRepository userBundleRepository;
     private static final Set<String> IMAGE_CONTENT_TYPES = Set.of(
             "image/png",
             "image/jpeg",
@@ -106,14 +115,22 @@ public class FileController {
     }
 
     @EmailVerifiedOnly
-    @PreAuthorize("hasAuthority('USER')")
-    @GetMapping("/api/private/download/{filename}")
-    public ResponseEntity<?> downloadFile(@PathVariable String filename) {
+    @GetMapping("/api/private/download/{id}")
+    public ResponseEntity<?> downloadFileApiKey(@PathVariable Long id,
+                                          @RequestHeader(value = "X-API-KEY") String apiKey) {
+        User user = userService.getUserByApiKey(apiKey);
+        AssetBundleInfo bundle = assetBundleService.getBundle(id);
+
+        if (!userBundleRepository.existsByUserAndAssetBundle(user, bundle) &&
+        !assetBundleInfoRepository.existsByUploadedBy(user)) {
+            throw new IllegalArgumentException(String.format("Бандл %s не принадлежит пользователю", bundle.getName()));
+        }
+
         try {
-            Path filepath = Path.of(uploadDir, filename).toAbsolutePath();
+            Path filepath = Path.of(uploadDir, bundle.getFilename()).toAbsolutePath();
             byte[] fileBytes = Files.readAllBytes(filepath);
             return ResponseEntity.ok()
-                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"")
+                    .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + bundle.getFilename() + "\"")
                     .body(Map.of("file", fileBytes));
         } catch (IOException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Не удалось скачать файл!"));
@@ -121,24 +138,49 @@ public class FileController {
     }
 
     @EmailVerifiedOnly
-    @GetMapping("/api/secured/myBundles")
-    public ResponseEntity<?> getUserBundles(@AuthenticationPrincipal UserDetailsImpl userDetails) {
-        Role role = Role.valueOf(userDetails.getAuthorities().stream()
-                .findFirst()
-                .map(GrantedAuthority::getAuthority)
-                .orElse(null));
-
+    @GetMapping("/api/secured/download/{id}")
+    public ResponseEntity<?> downloadFileAuthorized(@AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                    @PathVariable Long id) {
         User user = userService.getUser(userDetails.getUsername());
+        AssetBundleInfo bundle = assetBundleService.getBundle(id);
 
-        switch (role) {
-            case USER -> {
-                return ResponseEntity.ok(Map.of("myBundles", assetBundleService.getBundlesByUser(user)));
-            }
-            case DEVELOPER -> {
-                return ResponseEntity.ok(Map.of("myBundles", assetBundleService.getBundlesByDeveloper(user)));
-            }
-            default -> throw new UnsupportedOperationException();
+        if (!userBundleRepository.existsByUserAndAssetBundle(user, bundle) &&
+                !assetBundleInfoRepository.existsByUploadedBy(user)) {
+            throw new IllegalArgumentException(String.format("Бандл %s не принадлежит пользователю", bundle.getName()));
         }
+
+        try {
+            Path filepath = Path.of(uploadDir, bundle.getFilename()).toAbsolutePath();
+
+            Resource resource = new UrlResource(filepath.toUri());
+            return ResponseEntity.ok()
+                    .contentType(MediaType.APPLICATION_OCTET_STREAM)
+                    .header(
+                            HttpHeaders.CONTENT_DISPOSITION,
+                            "attachment; filename=\"" + bundle.getFilename() + "\""
+                    )
+                    .body(resource);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", "Не удалось скачать файл!"));
+        }
+    }
+
+    @EmailVerifiedOnly
+    @GetMapping("/api/secured/myBundles")
+    public ResponseEntity<?> getUserBundlesAuthorized(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        User user = userService.getUser(userDetails.getUsername());
+        Role role = user.getRole();
+
+        return getBundlesByUser(user, role);
+    }
+
+    @EmailVerifiedOnly
+    @GetMapping("/api/private/myBundles")
+    public ResponseEntity<?> getUserBundlesApiKey(@RequestHeader(value = "X-API-KEY") String apiKey) {
+        User user = userService.getUserByApiKey(apiKey);
+        Role role = user.getRole();
+
+        return getBundlesByUser(user, role);
     }
 
     @EmailVerifiedOnly
@@ -172,5 +214,17 @@ public class FileController {
         assetBundleService.deleteBundle(bundle);
 
         return ResponseEntity.ok(Map.of("message", "Бандл успешно удален!"));
+    }
+
+    private ResponseEntity<?> getBundlesByUser(User user, Role role) {
+        switch (role) {
+            case USER -> {
+                return ResponseEntity.ok(Map.of("myBundles", assetBundleService.getBundlesByUser(user)));
+            }
+            case DEVELOPER -> {
+                return ResponseEntity.ok(Map.of("myBundles", assetBundleService.getBundlesByDeveloper(user)));
+            }
+            default -> throw new UnsupportedOperationException();
+        }
     }
 }

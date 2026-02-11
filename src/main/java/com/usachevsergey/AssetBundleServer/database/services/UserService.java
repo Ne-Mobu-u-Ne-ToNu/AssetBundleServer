@@ -238,7 +238,13 @@ public class UserService implements UserDetailsService {
 
     public User getUser(String username) {
         return userRepository.findUserByUsername(username).orElseThrow(() -> new UsernameNotFoundException(
-                String.format("Пользователь '%s' не найден", username)
+                String.format("Пользователь '%s' не найден!", username)
+        ));
+    }
+
+    public User getUserByApiKey(String apiKey) {
+        return userRepository.findUserByApiKey(apiKey).orElseThrow(() -> new UsernameNotFoundException(
+                "Пользователь не найден!"
         ));
     }
 

@@ -48,7 +48,7 @@ function renderCardItems(bundlesInCard, mode, role) {
             downloadBtn.id = "download-btn";
             downloadBtn.textContent = "Скачать";
             downloadBtn.addEventListener("click", () => {
-                // Скачивание бандла
+                downloadBundle(bundle.id);
             });
             right.appendChild(downloadBtn);
         }
