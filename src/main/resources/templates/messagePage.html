@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="ru" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Подтверждение Email</title>
+
+  <link rel="stylesheet" href="/css/style_message_page.css">
+</head>
+<body>
+<div class="message-container">
+  <div class="message-card">
+    <h1 th:text="${status == 'success' ? '🎉 Успешно!' : '⚠️ Ошибка'}"></h1>
+    <p th:text="${message}"></p>
+  </div>
+</div>
+</body>
+</html>

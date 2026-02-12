@@ -1,11 +1,13 @@
 package com.usachevsergey.AssetBundleServer.controllers;
 
+import com.usachevsergey.AssetBundleServer.annotations.EmailVerifiedOnly;
 import com.usachevsergey.AssetBundleServer.database.enumerations.TokenType;
 import com.usachevsergey.AssetBundleServer.database.repositories.UserRepository;
 import com.usachevsergey.AssetBundleServer.database.repositories.VerificationTokenRepository;
 import com.usachevsergey.AssetBundleServer.database.services.UserService;
 import com.usachevsergey.AssetBundleServer.database.tables.User;
 import com.usachevsergey.AssetBundleServer.database.tables.VerificationToken;
+import com.usachevsergey.AssetBundleServer.exceptions.FieldNotFoundException;
 import com.usachevsergey.AssetBundleServer.requests.SigninRequest;
 import com.usachevsergey.AssetBundleServer.requests.SignupRequest;
 import com.usachevsergey.AssetBundleServer.requests.UpdateUserRequest;
@@ -90,24 +92,6 @@ public class SecurityController {
         return ResponseEntity.ok(Map.of("message","Выход выполнен успешно!"));
    }
 
-   @GetMapping("/verifyEmail")
-    ResponseEntity<?> verifyEmail(@RequestParam String token) {
-        VerificationToken verificationToken = tokenRepository.findByTokenAndType(token, TokenType.EMAIL_VERIFICATION).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "Токен не найден!"));
-
-        if (verificationToken.isExpired()) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Токен истек, запросите новый!"));
-        }
-
-        User user = verificationToken.getUser();
-        user.setEmailVerified(true);
-        userRepository.save(user);
-
-        tokenRepository.delete(verificationToken);
-
-        return ResponseEntity.ok(Map.of("message", "Email подтвержден!"));
-   }
-
     @PostMapping("/resetPassword/request")
     ResponseEntity<?> requestPasswordReset(@RequestParam String email) {
         User user = userRepository.findUserByEmail(email).orElseThrow(() ->
@@ -127,13 +111,10 @@ public class SecurityController {
     }
 
     @PutMapping("/resetPassword/confirm")
+    @EmailVerifiedOnly
     ResponseEntity<?> confirmPasswordReset(@RequestBody UpdateUserRequest request) {
         VerificationToken verificationToken = tokenRepository.findByTokenAndType(request.getVerToken(), TokenType.PASSWORD_RESET).orElseThrow(() ->
-                new ResponseStatusException(HttpStatus.NOT_FOUND, "Токен не найден!"));
-
-        if (!verificationToken.getUser().isEmailVerified()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Подтвердите адрес электронной почты!");
-        }
+                new FieldNotFoundException(HttpStatus.NOT_FOUND, "Токен не найден!"));
 
         if (verificationToken.isExpired()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", "Токен истек, запросите новый!"));

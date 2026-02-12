@@ -12,6 +12,8 @@ import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.access.AccessDeniedHandler;
 
 import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class JsonSecurityHandler implements AuthenticationEntryPoint, AccessDeniedHandler {
@@ -21,12 +23,13 @@ public class JsonSecurityHandler implements AuthenticationEntryPoint, AccessDeni
     @Override
     public void commence(HttpServletRequest request, HttpServletResponse response,
                          AuthenticationException authException) throws IOException, ServletException {
-        writeJsonResponse(response, HttpServletResponse.SC_UNAUTHORIZED, "Требуется авторизация для доступа к ресурсу!");
+        String message = "Требуется авторизация для доступа к ресурсу!";
+        redirect(request, response, message, HttpServletResponse.SC_UNAUTHORIZED);
     }
 
     @Override
     public void handle(HttpServletRequest request, HttpServletResponse response,
-                       AccessDeniedException accessDeniedException) throws IOException, ServletException {
+                       AccessDeniedException accessDeniedException) throws IOException {
         String message;
         if (accessDeniedException instanceof AuthorizationDeniedException) {
             message = "У вас не та роль! Смените учетную запись";
@@ -34,7 +37,7 @@ public class JsonSecurityHandler implements AuthenticationEntryPoint, AccessDeni
             message = "Ошибка доступа к ресурсу!";
         }
 
-        writeJsonResponse(response, HttpServletResponse.SC_FORBIDDEN, message);
+        redirect(request, response, message, HttpServletResponse.SC_FORBIDDEN);
     }
 
     private void writeJsonResponse(HttpServletResponse response, int status, String message) throws IOException {
@@ -44,5 +47,18 @@ public class JsonSecurityHandler implements AuthenticationEntryPoint, AccessDeni
 
         Map<String, String> body = Map.of("error", message);
         response.getWriter().write(objectMapper.writeValueAsString(body));
+    }
+
+    private boolean isApiRequest(HttpServletRequest request) {
+        return request.getRequestURI().startsWith("/api/");
+    }
+
+    private void redirect(HttpServletRequest request, HttpServletResponse response,
+                          String message, int responseCode) throws IOException {
+        if (isApiRequest(request)) {
+            writeJsonResponse(response, responseCode, message);
+        } else {
+            response.sendRedirect("/errorPage?message=" + URLEncoder.encode(message, StandardCharsets.UTF_8));
+        }
     }
 }
