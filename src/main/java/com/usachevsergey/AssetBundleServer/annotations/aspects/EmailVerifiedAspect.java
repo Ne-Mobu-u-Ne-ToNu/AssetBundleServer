@@ -1,5 +1,6 @@
 package com.usachevsergey.AssetBundleServer.annotations.aspects;
 
+import com.usachevsergey.AssetBundleServer.exceptions.VerifyEmailException;
 import com.usachevsergey.AssetBundleServer.security.authorization.UserDetailsImpl;
 import com.usachevsergey.AssetBundleServer.database.repositories.UserRepository;
 import com.usachevsergey.AssetBundleServer.database.tables.User;
@@ -27,7 +28,7 @@ public class EmailVerifiedAspect {
         User user = extractUser();
 
         if (!user.isEmailVerified()) {
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Подтвердите адрес электронной почты!");
+            throw new VerifyEmailException(HttpStatus.PRECONDITION_REQUIRED, "Подтвердите адрес электронной почты!");
         }
     }
 

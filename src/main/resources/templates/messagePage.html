@@ -2,7 +2,7 @@
 <html lang="ru" xmlns:th="http://www.thymeleaf.org">
 <head>
   <meta charset="UTF-8">
-  <title>Подтверждение Email</title>
+  <title th:text="${status == 'success' ? '🎉 Успешно!' : '⚠️ Ошибка'}"></title>
 
   <link rel="stylesheet" href="/css/style_message_page.css">
 </head>
@@ -20,6 +20,32 @@
          class="btn secondary">
         Войти
       </a>
+
+      <a href="/secured/profile"
+         th:if="${errorCode == 428}"
+         class="btn secondary">
+        Профиль
+      </a>
+
+      <a href="#"
+         class="btn secondary"
+         id="backLink">
+        Назад
+      </a>
+
+      <script>
+        const backLink = document.getElementById('backLink');
+
+        if (history.length > 1) {
+          backLink.addEventListener('click', function (e) {
+            e.preventDefault();
+            history.back();
+          });
+        } else {
+          backLink.style.display = 'none';
+        }
+      </script>
+
     </div>
 
   </div>
