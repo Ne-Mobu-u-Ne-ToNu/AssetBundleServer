@@ -58,7 +58,8 @@ public class JsonSecurityHandler implements AuthenticationEntryPoint, AccessDeni
         if (isApiRequest(request)) {
             writeJsonResponse(response, responseCode, message);
         } else {
-            response.sendRedirect("/errorPage?message=" + URLEncoder.encode(message, StandardCharsets.UTF_8));
+            response.sendRedirect("/errorPage?message=" + URLEncoder.encode(message, StandardCharsets.UTF_8)
+                    + "&errorCode=" + responseCode);
         }
     }
 }

@@ -11,6 +11,17 @@
   <div class="message-card">
     <h1 th:text="${status == 'success' ? '🎉 Успешно!' : '⚠️ Ошибка'}"></h1>
     <p th:text="${message}"></p>
+
+    <div class="error-actions">
+      <a href="/" class="btn">На главную</a>
+
+      <a href="/authorization"
+         th:if="${errorCode == 401 || errorCode == 403}"
+         class="btn secondary">
+        Войти
+      </a>
+    </div>
+
   </div>
 </div>
 </body>

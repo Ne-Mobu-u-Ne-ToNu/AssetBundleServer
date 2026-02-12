@@ -7,6 +7,7 @@ import com.usachevsergey.AssetBundleServer.database.repositories.VerificationTok
 import com.usachevsergey.AssetBundleServer.database.tables.User;
 import com.usachevsergey.AssetBundleServer.database.tables.VerificationToken;
 import com.usachevsergey.AssetBundleServer.exceptions.FieldNotFoundException;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -58,6 +59,7 @@ public class PageController {
         if (verificationToken.isExpired()) {
             model.addAttribute("status", "error");
             model.addAttribute("message", "Токен истек, запросите новый!");
+            model.addAttribute("errorCode", HttpStatus.BAD_REQUEST);
             return "messagePage";
         }
 
@@ -112,6 +114,7 @@ public class PageController {
         if (verificationToken.isExpired()) {
             model.addAttribute("status", "error");
             model.addAttribute("message", "Токен истек, запросите новый!");
+            model.addAttribute("errorCode", HttpStatus.BAD_REQUEST);
             return "messagePage";
         }
 
@@ -123,14 +126,16 @@ public class PageController {
 
         model.addAttribute("status", "success");
         model.addAttribute("message", "Email подтвержден!");
+        model.addAttribute("errorCode", HttpStatus.OK);
 
         return "messagePage";
     }
 
     @GetMapping("/errorPage")
-    public String errorPage(@RequestParam String message, Model model) {
+    public String errorPage(@RequestParam String message, @RequestParam int errorCode, Model model) {
         model.addAttribute("status", "error");
         model.addAttribute("message", message);
+        model.addAttribute("errorCode", errorCode);
 
         return "messagePage";
     }
