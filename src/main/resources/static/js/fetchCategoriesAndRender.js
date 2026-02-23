@@ -164,6 +164,24 @@ function getSelectedCategoryIds() {
     return ids;
 }
 
+function applySelectedCategories(categories) {
+    if (!categories) return;
+
+    for (const cb of checkboxMap.values()) {
+        cb.checked = false;
+        cb.indeterminate = false;
+        cb.closest('.checkbox-wrapper')?.classList.remove('indeterminate');
+    }
+
+    categories.forEach(cat => {
+        const cb = checkboxMap.get(cat.id);
+        if (cb) {
+            cb.checked = true;
+            cb.dispatchEvent(new Event('change', { bubbles: true }));
+        }
+    });
+}
+
 clearCategoriesBtn.addEventListener('click', () => {
     for (const cb of checkboxMap.values()) {
         cb.checked = false;

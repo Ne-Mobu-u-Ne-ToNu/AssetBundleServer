@@ -35,4 +35,6 @@ public interface BundleCategoryRepository extends JpaRepository<BundleCategory, 
             @Param("categoryIds") List<Long> categoryIds,
             Pageable pageable
     );
+
+    void deleteByAssetBundle(AssetBundleInfo assetBundle);
 }

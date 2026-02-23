@@ -20,18 +20,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @RestController
 public class FileController {
@@ -50,15 +46,6 @@ public class FileController {
     private CartItemService cartItemService;
     @Autowired
     private UserBundleRepository userBundleRepository;
-    private static final Set<String> IMAGE_CONTENT_TYPES = Set.of(
-            "image/png",
-            "image/jpeg",
-            "image/webp"
-    );
-
-    private static final Set<String> BUNDLE_EXTENSIONS = Set.of(
-            "zip", "rar", "7z", "tar", "gz"
-    );
 
     @EmailVerifiedOnly
     @PreAuthorize("hasAuthority('DEVELOPER')")
@@ -72,24 +59,12 @@ public class FileController {
         User user = userService.getUser(userDetails.getUsername());
 
         try {
-            MultipartFile bundleFile = request.getBundleFile();
-            String bundleExt = StringUtils.getFilenameExtension(bundleFile.getOriginalFilename());
-            if (!BUNDLE_EXTENSIONS.contains(bundleExt.toLowerCase())) {
-                throw new IllegalArgumentException("Недопустимый формат бандла!");
+            if (assetBundleInfoRepository.existsByNameAndUploadedBy(request.getName(), user)) {
+                throw new IllegalArgumentException("Выберите другое название!");
             }
 
-            Path targetPath = Path.of(uploadDir, request.getFilename(user.getId())).toAbsolutePath();
-            Files.copy(bundleFile.getInputStream(), targetPath);
-
-            for (MultipartFile current : request.getImages()) {
-                if (!IMAGE_CONTENT_TYPES.contains(current.getContentType())) {
-                    throw new IllegalArgumentException("Недопустимый формат изображения!");
-                }
-                targetPath = Path.of(thumbnailsDir, user.getId() + "_" + StringUtils.cleanPath(current.getOriginalFilename()))
-                        .toAbsolutePath();
-                Files.copy(current.getInputStream(), targetPath);
-            }
-
+            assetBundleService.saveBundleFile(request, user.getId());
+            assetBundleService.saveBundleImages(request, user.getId());
             assetBundleService.uploadAssetBundle(request, user);
 
             return ResponseEntity.ok(Map.of("message", "Файл загружен: " + request.getFilename(user.getId())));
@@ -97,6 +72,28 @@ public class FileController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
                     Map.of("error", "Ошибка загрузки файла: " + request.getFilename(user.getId())));
         }
+    }
+
+    @EmailVerifiedOnly
+    @PreAuthorize("hasAuthority('DEVELOPER')")
+    @PutMapping("/api/secured/edit/{id}")
+    public ResponseEntity<?> editBundle(@PathVariable Long id,
+                                        @ModelAttribute AddAssetBundleRequest request,
+                                        @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("error", "Пользователь не авторизован!"));
+        }
+
+        User user = userService.getUser(userDetails.getUsername());
+
+        try {
+            assetBundleService.updateBundle(id, request, user);
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(
+                    Map.of("error", "Ошибка загрузки при редактировании бандла!"));
+        }
+
+        return ResponseEntity.ok(Map.of("message", "Бандл успешно отредактирован!"));
     }
 
     @GetMapping("/api/public/search")

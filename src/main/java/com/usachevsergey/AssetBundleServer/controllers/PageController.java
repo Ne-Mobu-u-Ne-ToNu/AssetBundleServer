@@ -7,7 +7,6 @@ import com.usachevsergey.AssetBundleServer.database.repositories.VerificationTok
 import com.usachevsergey.AssetBundleServer.database.tables.User;
 import com.usachevsergey.AssetBundleServer.database.tables.VerificationToken;
 import com.usachevsergey.AssetBundleServer.exceptions.FieldNotFoundException;
-import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -36,6 +35,10 @@ public class PageController {
     @GetMapping("/secured/uploadFile")
     public String files(Model model) {
         generatePage("Загрузка файла", "uploadFile", model);
+        model.addAttribute("includeManageFileScript", true);
+        model.addAttribute("buttonText", "Загрузить");
+        model.addAttribute("requiredAllInputs", true);
+
         return templateHtml;
     }
 
@@ -138,6 +141,18 @@ public class PageController {
         model.addAttribute("errorCode", errorCode);
 
         return "messagePage";
+    }
+
+    @GetMapping("/secured/editFile/{id}")
+    @EmailVerifiedOnly
+    @PreAuthorize("hasAuthority('DEVELOPER')")
+    public String editFile(Model model) {
+        generatePage("Редактировать бандл", "uploadFile", model);
+        model.addAttribute("includeEditFileScript", true);
+        model.addAttribute("buttonText", "Сохранить");
+        model.addAttribute("requiredAllInputs", false);
+
+        return templateHtml;
     }
 
     private void generatePage(String title, String pageHtmlName, Model model) {

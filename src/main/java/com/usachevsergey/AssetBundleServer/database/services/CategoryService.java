@@ -9,6 +9,7 @@ import com.usachevsergey.AssetBundleServer.database.tables.Category;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
@@ -37,6 +38,14 @@ public class CategoryService {
             bundleCategory.setAssetBundle(bundle);
             bundleCategoryRepository.save(bundleCategory);
         }
+    }
+
+    @Transactional
+    public void editBundleCategories(List<Long> categoryIds, AssetBundleInfo bundle) {
+        bundleCategoryRepository.deleteByAssetBundle(bundle);
+        bundleCategoryRepository.flush();
+
+        saveBundleCategories(categoryIds, bundle);
     }
 
     private CategoryDTO toDTO(Category category) {

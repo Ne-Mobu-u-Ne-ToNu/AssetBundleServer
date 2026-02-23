@@ -12,59 +12,10 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     await fetchCategoriesAndRender(categoriesTreeEl);
 
-    function preventDefaults(e) {
-        e.preventDefault();
-        e.stopPropagation();
-    }
+    handleDragOver(bundleDrop, bundleInput, null, bundleDrop, null, null);
+    handleDragOver(imageDrop, null, imageInput, null, imageDrop, imageList);
 
-    function handleDragOver(dropArea) {
-        dropArea.addEventListener("dragover", e => {
-            preventDefaults(e);
-            dropArea.classList.add("dragover");
-        });
-
-        dropArea.addEventListener("dragleave", () => {
-            dropArea.classList.remove("dragover");
-        });
-
-        dropArea.addEventListener("drop", e => {
-            preventDefaults(e);
-            dropArea.classList.remove("dragover");
-
-            const files = e.dataTransfer.files;
-            if (dropArea === bundleDrop && files.length === 1) {
-                bundleInput.files = files;
-                bundleFileName.textContent = files[0].name;
-            }
-
-            if (dropArea === imageDrop) {
-                imageInput.files = files;
-                renderImageList(files);
-            }
-        });
-    }
-
-    function renderImageList(files) {
-        imageList.innerHTML = '';
-        for (const file of files) {
-            const li = document.createElement('li');
-            li.textContent = file.name;
-            imageList.appendChild(li);
-        }
-    }
-
-    bundleInput.addEventListener("change", () => {
-        if (bundleInput.files.length) {
-            bundleFileName.textContent = bundleInput.files[0].name;
-        }
-    });
-
-    imageInput.addEventListener("change", () => {
-        renderImageList(imageInput.files);
-    });
-
-    handleDragOver(bundleDrop);
-    handleDragOver(imageDrop);
+    addDragOverEventListeners(bundleInput, bundleFileName, imageInput, imageList);
 
     form.addEventListener("submit", function (e) {
         e.preventDefault();
@@ -85,11 +36,15 @@ document.addEventListener("DOMContentLoaded", async () => {
         formData.append("name", name);
         formData.append("description", description);
         formData.append("price", price);
-        formData.append("bundleFile", bundleFile);
+        if (bundleFile) {
+            formData.append("bundleFile", bundleFile);
+        }
         formData.append("categoryIds", categoryIds);
 
-        for (let i = 0; i < imageFiles.length; i++) {
-            formData.append("images", imageFiles[i]);
+        if (imageFiles) {
+            for (let i = 0; i < imageFiles.length; i++) {
+                formData.append("images", imageFiles[i]);
+            }
         }
 
             // Отправляем файл на сервер с помощью fetch

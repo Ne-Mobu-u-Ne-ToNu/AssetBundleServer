@@ -13,4 +13,5 @@ public interface AssetBundleInfoRepository extends JpaRepository<AssetBundleInfo
     Page<AssetBundleInfo> findByNameContainingIgnoreCase(String name, Pageable pageable);
     List<AssetBundleInfo> findByUploadedBy(User user);
     Boolean existsByUploadedBy(User user);
+    Boolean existsByNameAndUploadedBy(String name, User user);
 }

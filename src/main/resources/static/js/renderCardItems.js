@@ -58,7 +58,7 @@ function renderCardItems(bundlesInCard, mode, role) {
             editBtn.id = "edit-btn";
             editBtn.textContent = "Редактировать";
             editBtn.addEventListener("click", () => {
-                // Редактирование бандла
+                window.location.href = "/secured/editFile/" + bundle.id;
             });
             right.appendChild(editBtn);
         }

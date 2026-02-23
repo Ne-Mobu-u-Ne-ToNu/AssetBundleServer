@@ -6,10 +6,8 @@ import com.usachevsergey.AssetBundleServer.database.repositories.AssetBundleImag
 import com.usachevsergey.AssetBundleServer.database.repositories.AssetBundleInfoRepository;
 import com.usachevsergey.AssetBundleServer.database.repositories.BundleCategoryRepository;
 import com.usachevsergey.AssetBundleServer.database.repositories.UserBundleRepository;
-import com.usachevsergey.AssetBundleServer.database.tables.AssetBundleImage;
-import com.usachevsergey.AssetBundleServer.database.tables.AssetBundleInfo;
-import com.usachevsergey.AssetBundleServer.database.tables.User;
-import com.usachevsergey.AssetBundleServer.database.tables.UserBundle;
+import com.usachevsergey.AssetBundleServer.database.tables.*;
+import com.usachevsergey.AssetBundleServer.exceptions.FieldNotFoundException;
 import com.usachevsergey.AssetBundleServer.requests.AddAssetBundleRequest;
 import com.usachevsergey.AssetBundleServer.security.authorization.UserInputValidator;
 import jakarta.transaction.Transactional;
@@ -21,14 +19,20 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @Service
 public class AssetBundleService {
@@ -43,6 +47,16 @@ public class AssetBundleService {
     private CategoryService categoryService;
     @Autowired
     private BundleCategoryRepository bundleCategoryRepository;
+
+    private static final Set<String> IMAGE_CONTENT_TYPES = Set.of(
+            "image/png",
+            "image/jpeg",
+            "image/webp"
+    );
+
+    private static final Set<String> BUNDLE_EXTENSIONS = Set.of(
+            "zip", "rar", "7z", "tar", "gz"
+    );
 
     @Value("${file.upload-dir}")
     private String uploadDir;
@@ -60,7 +74,84 @@ public class AssetBundleService {
 
         categoryService.saveBundleCategories(request.getCategoryIds(), assetBundle);
 
-        saveImages(assetBundle, request.getImagesNames(user.getId()));
+        saveImagesDB(assetBundle, request.getImagesNames(user.getId()));
+    }
+
+    public void updateBundle(Long bundleId, AddAssetBundleRequest request, User user) throws IOException {
+        AssetBundleInfo assetBundle = assetBundleInfoRepository.findById(bundleId).orElseThrow(
+                () -> new IllegalArgumentException("Не удалось найти бандл!")
+        );
+        if (!assetBundleInfoRepository.existsByUploadedBy(user)) {
+            throw new IllegalArgumentException("У вас нет прав на редактирование бандла!");
+        }
+        boolean changed = false;
+        boolean categoryChanged = false;
+        boolean imagesChanged = false;
+
+        // Смена названия
+        String newName = request.getName();
+        if (!UserInputValidator.isNullOrEmpty(newName) && !assetBundle.getName().equals(newName)) {
+            if (assetBundleInfoRepository.existsByNameAndUploadedBy(newName, user)) {
+                throw new IllegalArgumentException("Выберите другое название!");
+            }
+
+            assetBundle.setName(newName);
+            changed = true;
+        }
+
+        // Смена описания
+        String newDesc = request.getDescription();
+        if (!UserInputValidator.isNullOrEmpty(newDesc) && !assetBundle.getDescription().equals(newDesc)) {
+            assetBundle.setDescription(newDesc);
+            changed = true;
+        }
+
+        // Смена цены
+        BigDecimal newPrice = request.getPrice();
+        if (!(newPrice == null) && assetBundle.getPrice().compareTo(newPrice) != 0) {
+            assetBundle.setPrice(newPrice);
+            changed = true;
+        }
+
+        // Смена категорий
+        List<Long> oldIds = bundleCategoryRepository.findByAssetBundle(assetBundle).stream()
+                .map(Category::getId)
+                .toList();
+        List<Long> newIds = request.getCategoryIds();
+        if (!(newIds == null) && !newIds.isEmpty() && !newIds.equals(oldIds)) {
+            categoryService.editBundleCategories(newIds, assetBundle);
+            categoryChanged = true;
+        }
+
+        // Смена файла бандла
+        if (!(request.getBundleFile() == null) &&
+                !request.getFilename(user.getId()).equals(assetBundle.getFilename()) &&
+                checkBundleNames(request.getFilename(user.getId()))) {
+            Files.deleteIfExists(Paths.get(uploadDir, assetBundle.getFilename()));
+            saveBundleFile(request, user.getId());
+            assetBundle.setFilename(request.getFilename(user.getId()));
+            changed = true;
+        }
+
+        // Смена изображений
+        if (!(request.getImages() == null) &&
+                !(request.getImages().isEmpty())) {
+            if (checkImagesNames(request.getImagesNames(user.getId()))) {
+                List<AssetBundleImage> images = assetBundleImageRepository.findImagesByAssetBundle(assetBundle)
+                        .orElseThrow(() -> new FieldNotFoundException(HttpStatus.NOT_FOUND, "Не удалось найти изображения бандла!"));
+                deleteImagesDB(images);
+                saveBundleImages(request, user.getId());
+                saveImagesDB(assetBundle, request.getImagesNames(user.getId()));
+                imagesChanged = true;
+            }
+        }
+
+        if (changed) {
+            assetBundleInfoRepository.save(assetBundle);
+        }
+        if (!changed && !categoryChanged && !imagesChanged) {
+            throw new IllegalArgumentException("Данные бандла не обновлены!");
+        }
     }
 
     public Map<String, ?> getBundlesBySearch(String name, String sort, List<Long> categoryIds,
@@ -135,20 +226,45 @@ public class AssetBundleService {
         return createDTOFromInfo(userBundleRepository.findBundlesByUser(user));
     }
 
+    public void saveBundleFile(AddAssetBundleRequest request, Long userId) throws IOException {
+        MultipartFile bundleFile = request.getBundleFile();
+        if (bundleFile == null) {
+            throw new IllegalArgumentException("Отсутвует бандл!");
+        }
+
+        String bundleExt = StringUtils.getFilenameExtension(bundleFile.getOriginalFilename());
+        if (!BUNDLE_EXTENSIONS.contains(bundleExt.toLowerCase())) {
+            throw new IllegalArgumentException("Недопустимый формат бандла!");
+        }
+
+        Path targetPath = Path.of(uploadDir, request.getFilename(userId)).toAbsolutePath();
+        Files.copy(bundleFile.getInputStream(), targetPath);
+    }
+
+    public void saveBundleImages(AddAssetBundleRequest request, Long userId) throws IOException {
+        if (request.getImages() == null) {
+            throw new IllegalArgumentException("Отсутствуют изображения!");
+        }
+
+        for (MultipartFile current : request.getImages()) {
+            if (!IMAGE_CONTENT_TYPES.contains(current.getContentType())) {
+                throw new IllegalArgumentException("Недопустимый формат изображения!");
+            }
+            Path targetPath = Path.of(thumbnailsDir, userId + "_" + StringUtils.cleanPath(current.getOriginalFilename()))
+                    .toAbsolutePath();
+            Files.copy(current.getInputStream(), targetPath);
+        }
+    }
+
     @Transactional
     public void deleteBundle(AssetBundleInfo bundle) {
         List<AssetBundleImage> images = assetBundleImageRepository.findImagesByAssetBundle(bundle).orElseThrow(() ->
                 new ResponseStatusException(HttpStatus.NOT_FOUND, "Изображения не найдены!"));
 
         try {
-            Path filePath;
-            for (AssetBundleImage image : images) {
-                filePath = Paths.get(thumbnailsDir, image.getPath());
-                Files.deleteIfExists(filePath);
-                assetBundleImageRepository.delete(image);
-            }
+            deleteImagesDB(images);
 
-            filePath = Paths.get(uploadDir, bundle.getFilename());
+            Path filePath = Paths.get(uploadDir, bundle.getFilename());
             Files.deleteIfExists(filePath);
             assetBundleInfoRepository.delete(bundle);
         } catch (IOException e) {
@@ -167,13 +283,23 @@ public class AssetBundleService {
         return info.stream().map(this::createDTOFromInfo).toList();
     }
 
-    private void saveImages(AssetBundleInfo assetBundle, List<String> imageList) {
+    private void saveImagesDB(AssetBundleInfo assetBundle, List<String> imageList) {
         for (String current : imageList) {
             AssetBundleImage assetBundleImage = new AssetBundleImage();
             assetBundleImage.setAssetBundle(assetBundle);
             assetBundleImage.setPath(current);
             assetBundleImageRepository.save(assetBundleImage);
         }
+    }
+
+    private void deleteImagesDB( List<AssetBundleImage> images) throws IOException {
+        Path filePath;
+        for (AssetBundleImage image : images) {
+            filePath = Paths.get(thumbnailsDir, image.getPath());
+            Files.deleteIfExists(filePath);
+            assetBundleImageRepository.delete(image);
+        }
+        assetBundleImageRepository.flush();
     }
 
     private void purchaseBundle(User user, AssetBundleInfo assetBundle) {
@@ -185,5 +311,45 @@ public class AssetBundleService {
         userBundle.setUser(user);
         userBundle.setAssetBundle(assetBundle);
         userBundleRepository.save(userBundle);
+    }
+
+    private List<String> listFilesInDirectory(String directoryPath) {
+        File dir = new File(directoryPath);
+
+        if (!dir.exists() || !dir.isDirectory()) {
+            return List.of();
+        }
+
+        File[] files = dir.listFiles();
+
+        if (files == null) {
+            return List.of();
+        }
+
+        return Arrays.stream(files)
+                .filter(File::isFile)
+                .map(File::getName)
+                .toList();
+    }
+    private boolean checkBundleNames(String newName) {
+        List<String> bundleNames = listFilesInDirectory(uploadDir);
+        for (String current : bundleNames) {
+            if (newName.equals(current)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private boolean checkImagesNames(List<String> newImagesNames) {
+        List<String> imageNames = listFilesInDirectory(thumbnailsDir);
+        for (String newCurrent : newImagesNames) {
+            for (String current : imageNames) {
+                if (newCurrent.equals(current)) {
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }

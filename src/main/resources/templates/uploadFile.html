@@ -3,10 +3,19 @@
     <main>
         <form id="uploadForm" class="form">
             <label class="form-label" for="name">Название:</label>
-            <input type="text" name="name" id="name" class="form-input" required>
+            <input type="text"
+                   name="name"
+                   id="name"
+                   class="form-input"
+                   th:attr="required=${requiredAllInputs}"
+                   >
 
             <label class="form-label" for="description">Описание:</label>
-            <textarea name="description" id="description" rows="4" class="form-textarea" required></textarea>
+            <textarea name="description"
+                      id="description"
+                      rows="4"
+                      class="form-textarea"
+                      th:attr="required=${requiredAllInputs}"></textarea>
 
             <label class="form-label" for="price">Цена (₽):</label>
             <input
@@ -14,10 +23,10 @@
                     name="price"
                     id="price"
                     class="form-textarea"
-                    step="0.01"
+                    step="0.5"
                     min="0"
                     placeholder="Введите цену"
-                    required
+                    th:attr="required=${requiredAllInputs}"
             />
 
             <br>
@@ -39,9 +48,11 @@
                 <p>Перетащите бандл в форматах .zip,.rar,.7z,.tar,.gz сюда или нажмите для выбора</p>
                 <input type="file"
                        id="bundleInput"
+                       name="bundleFile"
                        class="fileElem"
-                        accept=".zip,.rar,.7z,.tar,.gz"
-                       required>
+                       accept=".zip,.rar,.7z,.tar,.gz"
+                       th:attr="required=${requiredAllInputs}"
+                       >
                 <label for="bundleInput" class="fileLabel">Выбрать файл</label>
             </div>
             <br>
@@ -53,15 +64,16 @@
                 <p>Перетащите изображения в форматах png, jpeg, webp сюда или нажмите для выбора</p>
                 <input type="file"
                        id="imageInput"
+                       name="images"
                        class="fileElem"
                        accept="image/png,image/jpeg,image/webp"
-                       multiple required>
+                       multiple th:attr="required=${requiredAllInputs}">
                 <label for="imageInput" class="fileLabel">Выбрать изображения</label>
             </div>
             <br>
             <ul id="imageList"></ul>
 
-            <button type="submit" class="uploadBtn">Загрузить</button>
+            <button type="submit" class="uploadBtn" th:text="${buttonText}">Загрузить</button>
         </form>
     </main>
 </div>
@@ -75,5 +87,13 @@
 <!-- extraScripts -->
 <th:block th:fragment="extraScripts">
     <script src="/js/fetchCategoriesAndRender.js"></script>
-    <script src="/js/manageFiles.js"></script>
+    <th:block th:if="${includeManageFileScript}">
+        <script src="/js/manageFiles.js"></script>
+    </th:block>
+
+    <th:block th:if="${includeEditFileScript}">
+        <script src="/js/editBundle.js"></script>
+    </th:block>
+
+    <script src="/js/dragOverHandler.js"></script>
 </th:block>

@@ -91,6 +91,7 @@ function updateData(request, method, formData, errorMessage, onSuccessRedirect) 
                 })
                 .catch(error => {
                   alert(error.message);
+                  window.location.reload();
                 });
 }
 

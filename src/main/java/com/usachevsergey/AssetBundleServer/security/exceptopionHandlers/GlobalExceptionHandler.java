@@ -1,5 +1,6 @@
 package com.usachevsergey.AssetBundleServer.security.exceptopionHandlers;
 
+import com.usachevsergey.AssetBundleServer.exceptions.FieldNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -36,6 +37,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleRuntimeException(RuntimeException ex) {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", ex.getMessage()));
+    }
+
+    @ExceptionHandler(FieldNotFoundException.class)
+    public ResponseEntity<?> handleFieldNotFoundException(FieldNotFoundException ex) {
+        return ResponseEntity
+                .status(ex.getStatusCode())
                 .body(Map.of("error", ex.getMessage()));
     }
 }
